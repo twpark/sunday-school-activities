@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Right Relationships — Lesson 87: Relationships</title>
+  <link rel="stylesheet" href="../../css/shared.css">
+  <style>
+    .intro-text {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* Assembled verse display */
+    .verse-progress {
+      background: #f8fafc;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      line-height: 1.8;
+      text-align: center;
+    }
+
+    .verse-word {
+      display: inline-block;
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin: 2px 3px;
+    }
+
+    .verse-word.solved {
+      color: var(--primary);
+    }
+
+    .verse-word.unsolved {
+      color: transparent;
+      background: var(--border);
+      border-radius: 4px;
+      min-width: 30px;
+      letter-spacing: 2px;
+    }
+
+    .verse-word.current {
+      color: transparent;
+      background: #dbeafe;
+      border-radius: 4px;
+      border: 2px dashed var(--primary);
+      min-width: 30px;
+    }
+
+    .verse-word.punctuation {
+      color: var(--text-light);
+      background: none;
+      border: none;
+      min-width: auto;
+      margin-left: -2px;
+    }
+
+    /* Puzzle area */
+    .puzzle-label {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-bottom: 10px;
+    }
+
+    .word-group-display {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .single-word-puzzle {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .target-slots {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+    }
+
+    .target-slot {
+      width: 32px;
+      height: 38px;
+      border: 2px dashed var(--border);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: white;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .target-slot.filled {
+      background: #dbeafe;
+      border-style: solid;
+      border-color: var(--primary);
+      color: var(--primary-dark);
+    }
+
+    .target-slot.correct {
+      background: #dcfce7;
+      border-style: solid;
+      border-color: var(--success);
+      color: #166534;
+    }
+
+    .target-slot.active-word {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    }
+
+    .word-separator {
+      width: 2px;
+      height: 38px;
+      background: var(--border);
+      border-radius: 1px;
+    }
+
+    .letter-tiles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      justify-content: center;
+    }
+
+    .letter-tile {
+      width: 32px;
+      height: 38px;
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s, border-color 0.15s;
+      user-select: none;
+    }
+
+    .letter-tile:hover { border-color: var(--primary); transform: scale(1.05); }
+    .letter-tile:active { transform: scale(0.95); }
+
+    .letter-tile.used {
+      opacity: 0.25;
+      pointer-events: none;
+      border-color: var(--border);
+    }
+
+    .letter-tile.locked {
+      opacity: 0.25;
+      pointer-events: none;
+    }
+
+    .tile-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      justify-content: center;
+    }
+
+    .tile-divider {
+      width: 8px;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 14px;
+    }
+
+    .action-row .btn { font-size: 0.9rem; padding: 8px 16px; }
+
+    /* Completion screen */
+    .completion-screen {
+      text-align: center;
+      padding: 30px 20px;
+      display: none;
+    }
+
+    .completion-screen .big-icon { font-size: 3rem; margin-bottom: 12px; }
+    .completion-screen h2 { margin-bottom: 8px; }
+
+    .full-verse {
+      background: #f0fdf4;
+      border-left: 4px solid var(--success);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      margin: 16px 0;
+      line-height: 1.7;
+    }
+
+    .full-verse .ref {
+      display: block;
+      text-align: right;
+      font-style: normal;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="../../index.html" class="back-link">&larr; All Lessons</a>
+
+    <div class="activity-header">
+      <span class="lesson-tag">Lesson 87 — Relationships</span>
+      <h1>Right Relationships</h1>
+      <p class="verse-ref">Amos 3:3</p>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen">
+      <p class="intro-text">
+        Eddie asked Kim for a date. He's really a nice guy but he's not a
+        Christian. What would God say? Unscramble the words below to find out!
+      </p>
+
+      <div class="score-display">
+        Step <span id="step-num">1</span> of <span id="step-total">7</span>
+      </div>
+      <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
+
+      <div class="verse-progress" id="verse-progress"></div>
+
+      <div class="card">
+        <div class="puzzle-label" id="puzzle-label">Unscramble:</div>
+
+        <div id="puzzle-area">
+          <div class="word-group-display" id="target-area"></div>
+          <div class="word-group-display" id="tiles-area"></div>
+        </div>
+
+        <div class="action-row">
+          <button class="btn btn-outline" onclick="clearCurrentWord()">Clear</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+      </div>
+    </div>
+
+    <!-- Completion Screen -->
+    <div class="completion-screen" id="completion-screen">
+      <div class="big-icon">&#x1F9E9;</div>
+      <h2>Verse Unscrambled!</h2>
+      <p>You unscrambled the whole verse:</p>
+
+      <div class="full-verse">
+        &ldquo;Be ye not unequally yoked together with unbelievers: for what
+        fellowship hath righteousness with unrighteousness?&rdquo;
+        <span class="ref">&mdash; 2 Corinthians 6:14</span>
+      </div>
+
+      <div class="full-verse">
+        &ldquo;Can two walk together, except they be agreed?&rdquo;
+        <span class="ref">&mdash; Amos 3:3</span>
+      </div>
+
+      <p class="intro-text" style="margin-top: 16px;">
+        God wants us to choose our closest relationships wisely. Just like
+        puzzle pieces that fit together, He wants us to walk with people who
+        share our faith and values.
+      </p>
+
+      <button class="btn btn-primary btn-block" onclick="restart()">Try Again</button>
+    </div>
+  </div>
+
+  <script src="../../js/shared.js"></script>
+  <script>
+    /*
+     * Word groups: each step is an array of words the student must unscramble.
+     * The full verse is: "Be ye not unequally yoked together with unbelievers
+     * for what fellowship hath righteousness with unrighteousness"
+     *
+     * Punctuation is rendered separately in the verse progress display.
+     */
+    const STEPS = [
+      { words: ['BE', 'YE', 'NOT'] },
+      { words: ['UNEQUALLY'] },
+      { words: ['YOKED', 'TOGETHER'] },
+      { words: ['WITH', 'UNBELIEVERS'] },
+      { words: ['FOR', 'WHAT', 'FELLOWSHIP'] },
+      { words: ['HATH', 'RIGHTEOUSNESS'] },
+      { words: ['WITH', 'UNRIGHTEOUSNESS'] }
+    ];
+
+    // The full verse words in order (for progress display)
+    const VERSE_WORDS = [
+      'Be', 'ye', 'not', 'unequally', 'yoked', 'together', 'with',
+      'unbelievers', 'for', 'what', 'fellowship', 'hath',
+      'righteousness', 'with', 'unrighteousness'
+    ];
+
+    // Punctuation after certain word indices (0-based)
+    const PUNCTUATION = {
+      7: ':',   // after "unbelievers"
+      14: '?'   // after "unrighteousness"
+    };
+
+    const TOTAL_STEPS = STEPS.length;
+
+    let currentStep = 0;
+    let solvedStepCount = 0;
+
+    // Per-step state
+    let wordStates = [];  // { word, letters[], guessed[], solved }
+    let activeWordIdx = 0;
+
+    function init() {
+      document.getElementById('step-total').textContent = TOTAL_STEPS;
+      solvedStepCount = 0;
+      currentStep = 0;
+      renderVerseProgress();
+      loadStep(0);
+    }
+
+    /* ---- Verse Progress Display ---- */
+
+    function getWordRangeForStep(stepIdx) {
+      let offset = 0;
+      for (let i = 0; i < stepIdx && i < STEPS.length; i++) {
+        offset += STEPS[i].words.length;
+      }
+      const count = stepIdx < STEPS.length ? STEPS[stepIdx].words.length : 0;
+      return { start: offset, end: offset + count };
+    }
+
+    function renderVerseProgress() {
+      const container = document.getElementById('verse-progress');
+      container.innerHTML = '';
+
+      const currentRange = getWordRangeForStep(currentStep);
+      const solvedUpTo = getWordRangeForStep(solvedStepCount).start;
+
+      VERSE_WORDS.forEach((word, i) => {
+        const span = document.createElement('span');
+        span.className = 'verse-word';
+
+        if (i < solvedUpTo) {
+          span.classList.add('solved');
+          span.textContent = word;
+        } else if (i >= currentRange.start && i < currentRange.end) {
+          span.classList.add('current');
+          // Show blanks matching word length
+          span.textContent = '\u00A0'.repeat(word.length);
+          span.style.minWidth = Math.max(30, word.length * 10) + 'px';
+        } else {
+          span.classList.add('unsolved');
+          span.textContent = '\u00A0'.repeat(word.length);
+          span.style.minWidth = Math.max(30, word.length * 10) + 'px';
+        }
+
+        container.appendChild(span);
+
+        // Add punctuation if present after this word
+        if (PUNCTUATION[i]) {
+          const punc = document.createElement('span');
+          punc.className = 'verse-word punctuation';
+          if (i < solvedUpTo) {
+            punc.textContent = PUNCTUATION[i];
+          } else {
+            punc.textContent = '\u00A0';
+          }
+          container.appendChild(punc);
+        }
+      });
+    }
+
+    /* ---- Scramble Utility ---- */
+
+    function scrambleWord(word) {
+      const letters = word.split('');
+      if (letters.length <= 1) return letters;
+      let scrambled = SSA.shuffle(letters);
+      // Ensure scrambled is NOT the same as original
+      let attempts = 0;
+      while (scrambled.join('') === word && attempts < 20) {
+        scrambled = SSA.shuffle(letters);
+        attempts++;
+      }
+      return scrambled;
+    }
+
+    /* ---- Load a Step ---- */
+
+    function loadStep(stepIdx) {
+      currentStep = stepIdx;
+      activeWordIdx = 0;
+
+      document.getElementById('step-num').textContent = stepIdx + 1;
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        stepIdx, TOTAL_STEPS
+      );
+
+      // Build word states
+      wordStates = STEPS[stepIdx].words.map(word => ({
+        word: word,
+        letters: scrambleWord(word),
+        guessed: [],
+        solved: false
+      }));
+
+      renderVerseProgress();
+      renderPuzzle();
+      document.getElementById('feedback').style.display = 'none';
+    }
+
+    /* ---- Render the Puzzle ---- */
+
+    function renderPuzzle() {
+      renderTargets();
+      renderTiles();
+    }
+
+    function renderTargets() {
+      const container = document.getElementById('target-area');
+      container.innerHTML = '';
+
+      wordStates.forEach((ws, wIdx) => {
+        if (wIdx > 0) {
+          const sep = document.createElement('div');
+          sep.className = 'word-separator';
+          container.appendChild(sep);
+        }
+
+        const group = document.createElement('div');
+        group.className = 'single-word-puzzle';
+
+        const slots = document.createElement('div');
+        slots.className = 'target-slots';
+
+        for (let i = 0; i < ws.word.length; i++) {
+          const slot = document.createElement('div');
+          slot.className = 'target-slot';
+
+          if (ws.solved) {
+            slot.classList.add('correct');
+            slot.textContent = ws.word[i];
+          } else if (i < ws.guessed.length) {
+            slot.classList.add('filled');
+            slot.textContent = ws.guessed[i];
+            // Allow clicking filled slots to remove from end
+            if (wIdx === activeWordIdx) {
+              slot.style.cursor = 'pointer';
+              slot.onclick = () => undoGuessTo(wIdx, i);
+            }
+          } else if (wIdx === activeWordIdx && i === ws.guessed.length) {
+            slot.classList.add('active-word');
+          }
+
+          slots.appendChild(slot);
+        }
+
+        group.appendChild(slots);
+        container.appendChild(group);
+      });
+    }
+
+    function renderTiles() {
+      const container = document.getElementById('tiles-area');
+      container.innerHTML = '';
+
+      wordStates.forEach((ws, wIdx) => {
+        if (wIdx > 0) {
+          const spacer = document.createElement('div');
+          spacer.className = 'tile-divider';
+          container.appendChild(spacer);
+        }
+
+        const tileGroup = document.createElement('div');
+        tileGroup.className = 'tile-group';
+
+        ws.letters.forEach((letter, lIdx) => {
+          const tile = document.createElement('div');
+          tile.className = 'letter-tile';
+          tile.textContent = letter;
+
+          if (ws.solved) {
+            tile.classList.add('locked');
+          } else if (ws.usedIndices && ws.usedIndices.includes(lIdx)) {
+            tile.classList.add('used');
+          } else if (wIdx !== activeWordIdx) {
+            tile.classList.add('locked');
+          } else {
+            tile.onclick = () => tapTile(wIdx, lIdx);
+          }
+
+          tileGroup.appendChild(tile);
+        });
+
+        container.appendChild(tileGroup);
+      });
+    }
+
+    /* ---- Tap a Tile ---- */
+
+    function tapTile(wordIdx, letterIdx) {
+      const ws = wordStates[wordIdx];
+      if (ws.solved) return;
+      if (wordIdx !== activeWordIdx) return;
+
+      // Track used tile indices
+      if (!ws.usedIndices) ws.usedIndices = [];
+      if (ws.usedIndices.includes(letterIdx)) return;
+
+      ws.usedIndices.push(letterIdx);
+      ws.guessed.push(ws.letters[letterIdx]);
+
+      renderPuzzle();
+
+      // Check if word is complete
+      if (ws.guessed.length === ws.word.length) {
+        checkWord(wordIdx);
+      }
+    }
+
+    /* ---- Undo guess: remove from a position to end ---- */
+
+    function undoGuessTo(wordIdx, fromPos) {
+      const ws = wordStates[wordIdx];
+      if (ws.solved) return;
+
+      // Remove from fromPos onward
+      const removeCount = ws.guessed.length - fromPos;
+      ws.guessed.splice(fromPos, removeCount);
+
+      // Also remove corresponding used indices
+      if (ws.usedIndices) {
+        ws.usedIndices.splice(ws.usedIndices.length - removeCount, removeCount);
+      }
+
+      renderPuzzle();
+    }
+
+    /* ---- Clear Current Word ---- */
+
+    function clearCurrentWord() {
+      const ws = wordStates[activeWordIdx];
+      if (ws.solved) return;
+
+      ws.guessed = [];
+      ws.usedIndices = [];
+
+      renderPuzzle();
+      document.getElementById('feedback').style.display = 'none';
+    }
+
+    /* ---- Check Word ---- */
+
+    function checkWord(wordIdx) {
+      const ws = wordStates[wordIdx];
+      const guess = ws.guessed.join('');
+
+      if (guess === ws.word) {
+        ws.solved = true;
+        renderPuzzle();
+
+        // Find next unsolved word in this step
+        const nextUnsolved = wordStates.findIndex((w, i) => i > wordIdx && !w.solved);
+
+        if (nextUnsolved !== -1) {
+          // More words in this group
+          activeWordIdx = nextUnsolved;
+          SSA.showFeedback(
+            document.getElementById('feedback'),
+            true,
+            'Got it! Now unscramble the next word.'
+          );
+          renderPuzzle();
+        } else if (wordStates.every(w => w.solved)) {
+          // All words in this step are solved
+          solvedStepCount = currentStep + 1;
+          renderVerseProgress();
+
+          SSA.showFeedback(
+            document.getElementById('feedback'),
+            true,
+            'Correct! Step ' + (currentStep + 1) + ' complete!',
+            0
+          );
+
+          setTimeout(() => {
+            if (currentStep + 1 < TOTAL_STEPS) {
+              loadStep(currentStep + 1);
+            } else {
+              showCompletion();
+            }
+          }, 2500);
+        }
+      } else {
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          false,
+          'Not quite right. Tap Clear and try again!'
+        );
+
+        // Reset this word after feedback
+        setTimeout(() => {
+          if (!ws.solved) {
+            ws.guessed = [];
+            ws.usedIndices = [];
+            renderPuzzle();
+          }
+        }, 2500);
+      }
+    }
+
+    /* ---- Completion ---- */
+
+    function showCompletion() {
+      document.getElementById('game-screen').style.display = 'none';
+      document.getElementById('completion-screen').style.display = 'block';
+
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        TOTAL_STEPS, TOTAL_STEPS
+      );
+    }
+
+    function restart() {
+      document.getElementById('completion-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'block';
+      init();
+    }
+
+    init();
+  </script>
+</body>
+</html>

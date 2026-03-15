@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>It's Your Day, Mom! — Lesson 88: Family</title>
+  <link rel="stylesheet" href="../../css/shared.css">
+  <style>
+    .intro-text {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* Clue list */
+    .clue-list {
+      list-style: none;
+      margin-bottom: 16px;
+    }
+
+    .clue-item {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .clue-item.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    }
+
+    .clue-item.solved {
+      border-color: var(--success);
+      background: #f0fdf4;
+    }
+
+    .clue-item.solved .clue-input-area { display: none; }
+
+    .clue-number {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 24px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .clue-item.solved .clue-number {
+      background: var(--success);
+    }
+
+    .clue-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .clue-ref {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin-left: auto;
+      font-style: italic;
+    }
+
+    .clue-text {
+      font-size: 0.92rem;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .clue-text .blank {
+      display: inline-block;
+      min-width: 80px;
+      border-bottom: 2px solid var(--primary);
+      text-align: center;
+      font-weight: 700;
+      color: var(--primary-dark);
+      letter-spacing: 1px;
+    }
+
+    .clue-item.solved .clue-text .blank {
+      border-bottom-color: var(--success);
+      color: var(--success);
+    }
+
+    /* Letter slots for active clue */
+    .clue-input-area {
+      display: none;
+    }
+
+    .clue-item.active .clue-input-area {
+      display: block;
+    }
+
+    .letter-slots {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .letter-slot {
+      width: 32px;
+      height: 38px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: white;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .letter-slot.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+    }
+
+    .letter-slot.filled {
+      background: #dbeafe;
+      border-color: var(--primary);
+      color: var(--primary-dark);
+    }
+
+    .letter-slot.highlight {
+      background: #fef9c3;
+      border-color: #eab308;
+    }
+
+    .letter-slot.highlight.filled {
+      background: #fde047;
+      border-color: #ca8a04;
+      color: #713f12;
+    }
+
+    .input-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .input-actions .btn {
+      font-size: 0.85rem;
+      padding: 6px 14px;
+    }
+
+    /* A-Z letter buttons */
+    .letter-buttons {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    .letter-btn {
+      padding: 10px 2px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .letter-btn:hover { background: #e2e8f0; }
+    .letter-btn:active { background: #dbeafe; }
+
+    /* Crossword grid */
+    .crossword-section {
+      margin-bottom: 16px;
+    }
+
+    .crossword-section h2 {
+      text-align: center;
+      font-size: 1rem;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .crossword-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      margin-bottom: 8px;
+    }
+
+    .crossword-row {
+      display: flex;
+      gap: 2px;
+    }
+
+    .crossword-cell {
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: white;
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .crossword-cell.empty {
+      border: none;
+      background: transparent;
+    }
+
+    .crossword-cell.highlight-col {
+      background: #fef9c3;
+      border-color: #eab308;
+    }
+
+    .crossword-cell.filled {
+      background: #dbeafe;
+      border-color: var(--primary);
+      color: var(--primary-dark);
+    }
+
+    .crossword-cell.highlight-col.filled {
+      background: #fde047;
+      border-color: #ca8a04;
+      color: #713f12;
+    }
+
+    .hidden-word-label {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    /* Feedback */
+    .feedback {
+      margin: 10px 0;
+    }
+
+    /* Completion screen */
+    .completion-screen {
+      text-align: center;
+      padding: 30px 20px;
+      display: none;
+    }
+
+    .completion-screen .big-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .completion-screen h2 {
+      margin-bottom: 8px;
+    }
+
+    .hidden-word-reveal {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: 6px;
+      color: #ca8a04;
+      background: #fef9c3;
+      border: 3px solid #eab308;
+      border-radius: var(--radius);
+      padding: 16px 24px;
+      margin: 20px auto;
+      display: inline-block;
+    }
+
+    .full-verse {
+      background: #f0fdf4;
+      border-left: 4px solid var(--success);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      margin: 16px 0;
+      line-height: 1.7;
+      text-align: left;
+    }
+
+    .full-verse .ref {
+      display: block;
+      text-align: right;
+      font-style: normal;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-top: 8px;
+    }
+
+    @media (min-width: 600px) {
+      .crossword-cell {
+        width: 30px;
+        height: 30px;
+        font-size: 0.85rem;
+      }
+
+      .letter-slot {
+        width: 36px;
+        height: 42px;
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="../../index.html" class="back-link">&larr; All Lessons</a>
+
+    <div class="activity-header">
+      <span class="lesson-tag">Lesson 88 &mdash; Family</span>
+      <h1>It's Your Day, Mom!</h1>
+      <p class="verse-ref">Proverbs 31:10-31</p>
+    </div>
+
+    <div id="game-screen">
+      <p class="intro-text">
+        Read the clues from Proverbs 31 and fill in the missing word. Watch the highlighted column &mdash; it will reveal a special title!
+      </p>
+
+      <div class="score-display">
+        Clue <span id="clue-num">1</span> of <span id="clue-total">6</span>
+      </div>
+      <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
+
+      <!-- Crossword Grid -->
+      <div class="crossword-section card">
+        <h2>Crossword Puzzle</h2>
+        <div class="crossword-grid" id="crossword-grid"></div>
+        <div class="hidden-word-label">Hidden word in the highlighted column</div>
+      </div>
+
+      <!-- Clue List -->
+      <ul class="clue-list" id="clue-list"></ul>
+
+      <!-- Letter Buttons -->
+      <div class="card" id="keyboard-card">
+        <div class="letter-buttons" id="letter-buttons"></div>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+    </div>
+
+    <!-- Completion Screen -->
+    <div class="completion-screen" id="completion-screen">
+      <div class="big-icon">&#x1F490;</div>
+      <h2>Happy Mother's Day!</h2>
+
+      <p class="intro-text">The hidden word is:</p>
+      <div class="hidden-word-reveal">MOTHER</div>
+
+      <div class="full-verse">
+        &ldquo;Children, obey your parents in all things: for this is well pleasing unto the Lord.&rdquo;
+        <span class="ref">&mdash; Colossians 3:20</span>
+      </div>
+
+      <div class="full-verse">
+        &ldquo;As for me and my house, we will serve the Lord.&rdquo;
+        <span class="ref">&mdash; Joshua 24:15</span>
+      </div>
+
+      <p class="intro-text">
+        God has given us families as a blessing. When each family member fulfills their God-given responsibilities, the whole family is blessed. Honor your parents and thank God for your family!
+      </p>
+
+      <button class="btn btn-primary btn-block" onclick="restart()">Try Again</button>
+    </div>
+  </div>
+
+  <script src="../../js/shared.js"></script>
+  <script>
+    /* ===== Data ===== */
+    var CLUES = [
+      {
+        num: 1,
+        verse: '"She openeth her mouth with ______."',
+        ref: 'Proverbs 31:26',
+        answer: 'WISDOM',
+        keyIndex: 5,   // 0-indexed position of key letter in word
+        gridStart: 0   // 0-indexed column where word starts in grid
+      },
+      {
+        num: 2,
+        verse: '"Who can find a ______ woman?"',
+        ref: 'Proverbs 31:10',
+        answer: 'VIRTUOUS',
+        keyIndex: 5,
+        gridStart: 0
+      },
+      {
+        num: 3,
+        verse: '"She girdeth her loins with ______."',
+        ref: 'Proverbs 31:17',
+        answer: 'STRENGTH',
+        keyIndex: 1,
+        gridStart: 4
+      },
+      {
+        num: 4,
+        verse: '"Strength and ______ are her clothing."',
+        ref: 'Proverbs 31:25',
+        answer: 'HONOUR',
+        keyIndex: 0,
+        gridStart: 5
+      },
+      {
+        num: 5,
+        verse: '"Her children arise up, and call her ______."',
+        ref: 'Proverbs 31:28',
+        answer: 'BLESSED',
+        keyIndex: 2,
+        gridStart: 3
+      },
+      {
+        num: 6,
+        verse: '"A woman that ______ the Lord, she shall be praised."',
+        ref: 'Proverbs 31:30',
+        answer: 'FEARETH',
+        keyIndex: 3,
+        gridStart: 2
+      }
+    ];
+
+    var HIDDEN_WORD = 'MOTHER';
+    var HIGHLIGHT_COL = 5; // 0-indexed column in grid that spells MOTHER
+    var GRID_COLS = 12;    // total columns needed for the widest span
+
+    var activeClue = 0;
+    var solvedCount = 0;
+    var slotIndex = 0;
+    var currentGuess = [];
+
+    /* ===== Init ===== */
+    function init() {
+      activeClue = 0;
+      solvedCount = 0;
+      slotIndex = 0;
+      currentGuess = [];
+      document.getElementById('clue-total').textContent = CLUES.length;
+      buildCrosswordGrid();
+      buildClueList();
+      buildLetterButtons();
+      activateClue(0);
+    }
+
+    /* ===== Crossword Grid ===== */
+    function buildCrosswordGrid() {
+      var grid = document.getElementById('crossword-grid');
+      grid.innerHTML = '';
+
+      // Calculate the actual column range used
+      var minCol = GRID_COLS;
+      var maxCol = 0;
+      CLUES.forEach(function(c) {
+        if (c.gridStart < minCol) minCol = c.gridStart;
+        var end = c.gridStart + c.answer.length - 1;
+        if (end > maxCol) maxCol = end;
+      });
+
+      for (var r = 0; r < CLUES.length; r++) {
+        var row = document.createElement('div');
+        row.className = 'crossword-row';
+
+        for (var col = minCol; col <= maxCol; col++) {
+          var cell = document.createElement('div');
+          var c = CLUES[r];
+          var localCol = col - c.gridStart;
+
+          if (localCol >= 0 && localCol < c.answer.length) {
+            cell.className = 'crossword-cell';
+            cell.id = 'grid-' + r + '-' + col;
+            if (col === HIGHLIGHT_COL) {
+              cell.classList.add('highlight-col');
+            }
+          } else {
+            cell.className = 'crossword-cell empty';
+          }
+
+          row.appendChild(cell);
+        }
+
+        grid.appendChild(row);
+      }
+    }
+
+    function fillGridRow(clueIdx) {
+      var c = CLUES[clueIdx];
+      for (var i = 0; i < c.answer.length; i++) {
+        var col = c.gridStart + i;
+        var cell = document.getElementById('grid-' + clueIdx + '-' + col);
+        if (cell) {
+          cell.textContent = c.answer[i];
+          cell.classList.add('filled');
+        }
+      }
+    }
+
+    /* ===== Clue List ===== */
+    function buildClueList() {
+      var list = document.getElementById('clue-list');
+      list.innerHTML = '';
+
+      CLUES.forEach(function(c, i) {
+        var li = document.createElement('li');
+        li.className = 'clue-item';
+        li.id = 'clue-item-' + i;
+
+        // Header row
+        var header = document.createElement('div');
+        header.className = 'clue-header';
+        header.innerHTML =
+          '<span class="clue-number">' + c.num + '</span>' +
+          '<span class="clue-ref">' + c.ref + '</span>';
+        li.appendChild(header);
+
+        // Verse text with blank
+        var text = document.createElement('div');
+        text.className = 'clue-text';
+        text.id = 'clue-text-' + i;
+        var parts = c.verse.split('______');
+        text.innerHTML = parts[0] + '<span class="blank" id="clue-blank-' + i + '">&nbsp;</span>' + parts[1];
+        li.appendChild(text);
+
+        // Input area (letter slots + actions)
+        var inputArea = document.createElement('div');
+        inputArea.className = 'clue-input-area';
+
+        var slots = document.createElement('div');
+        slots.className = 'letter-slots';
+        slots.id = 'slots-' + i;
+
+        for (var j = 0; j < c.answer.length; j++) {
+          var slot = document.createElement('div');
+          slot.className = 'letter-slot';
+          slot.id = 'slot-' + i + '-' + j;
+          if (j === c.keyIndex) {
+            slot.classList.add('highlight');
+          }
+          slots.appendChild(slot);
+        }
+
+        inputArea.appendChild(slots);
+
+        var actions = document.createElement('div');
+        actions.className = 'input-actions';
+        actions.innerHTML =
+          '<button class="btn btn-outline" onclick="clearCurrent()">Clear</button>' +
+          '<button class="btn btn-primary" onclick="submitAnswer()">Check</button>';
+        inputArea.appendChild(actions);
+
+        li.appendChild(inputArea);
+        list.appendChild(li);
+      });
+    }
+
+    /* ===== Letter Buttons ===== */
+    function buildLetterButtons() {
+      var container = document.getElementById('letter-buttons');
+      container.innerHTML = '';
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(letter) {
+        var btn = document.createElement('button');
+        btn.className = 'letter-btn';
+        btn.textContent = letter;
+        btn.onclick = function() { pickLetter(letter); };
+        container.appendChild(btn);
+      });
+    }
+
+    /* ===== Activate Clue ===== */
+    function activateClue(idx) {
+      activeClue = idx;
+      slotIndex = 0;
+      currentGuess = [];
+
+      // Update clue-num display
+      document.getElementById('clue-num').textContent = idx + 1;
+
+      // Remove active from all clue items
+      CLUES.forEach(function(_, i) {
+        var el = document.getElementById('clue-item-' + i);
+        el.classList.remove('active');
+      });
+
+      // Set active
+      var item = document.getElementById('clue-item-' + idx);
+      item.classList.add('active');
+
+      // Reset slots
+      var c = CLUES[idx];
+      for (var j = 0; j < c.answer.length; j++) {
+        var slot = document.getElementById('slot-' + idx + '-' + j);
+        slot.textContent = '';
+        slot.classList.remove('filled');
+        if (j === 0) {
+          slot.classList.add('active');
+        } else {
+          slot.classList.remove('active');
+        }
+      }
+
+      // Scroll clue into view
+      item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        solvedCount, CLUES.length
+      );
+    }
+
+    /* ===== Pick Letter ===== */
+    function pickLetter(letter) {
+      var c = CLUES[activeClue];
+      if (slotIndex >= c.answer.length) return;
+
+      currentGuess.push(letter);
+      var slot = document.getElementById('slot-' + activeClue + '-' + slotIndex);
+      slot.textContent = letter;
+      slot.classList.add('filled');
+      slot.classList.remove('active');
+
+      slotIndex++;
+      if (slotIndex < c.answer.length) {
+        document.getElementById('slot-' + activeClue + '-' + slotIndex).classList.add('active');
+      }
+    }
+
+    /* ===== Clear ===== */
+    function clearCurrent() {
+      var c = CLUES[activeClue];
+      slotIndex = 0;
+      currentGuess = [];
+      for (var j = 0; j < c.answer.length; j++) {
+        var slot = document.getElementById('slot-' + activeClue + '-' + j);
+        slot.textContent = '';
+        slot.classList.remove('filled');
+        if (j === 0) {
+          slot.classList.add('active');
+        } else {
+          slot.classList.remove('active');
+        }
+      }
+      document.getElementById('feedback').style.display = 'none';
+    }
+
+    /* ===== Submit ===== */
+    function submitAnswer() {
+      var c = CLUES[activeClue];
+      var guess = currentGuess.join('');
+
+      if (guess.length < c.answer.length) {
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          false,
+          'Fill in all the letters first!'
+        );
+        return;
+      }
+
+      if (guess === c.answer) {
+        solvedCount++;
+
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          true,
+          'Correct! "' + c.answer + '"'
+        );
+
+        // Mark clue solved
+        var item = document.getElementById('clue-item-' + activeClue);
+        item.classList.remove('active');
+        item.classList.add('solved');
+
+        // Fill in the blank text
+        document.getElementById('clue-blank-' + activeClue).textContent = c.answer;
+
+        // Fill the crossword grid row
+        fillGridRow(activeClue);
+
+        SSA.updateProgress(
+          document.querySelector('.progress-bar'),
+          solvedCount, CLUES.length
+        );
+
+        setTimeout(function() {
+          document.getElementById('feedback').style.display = 'none';
+
+          if (solvedCount < CLUES.length) {
+            // Find next unsolved clue
+            var next = -1;
+            for (var i = 0; i < CLUES.length; i++) {
+              var el = document.getElementById('clue-item-' + i);
+              if (!el.classList.contains('solved')) {
+                next = i;
+                break;
+              }
+            }
+            if (next >= 0) {
+              activateClue(next);
+            }
+          } else {
+            showCompletion();
+          }
+        }, 2500);
+      } else {
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          false,
+          'Not quite \u2014 read the verse carefully and try again!'
+        );
+        setTimeout(function() { clearCurrent(); }, 2500);
+      }
+    }
+
+    /* ===== Completion ===== */
+    function showCompletion() {
+      document.getElementById('game-screen').style.display = 'none';
+      var screen = document.getElementById('completion-screen');
+      screen.style.display = 'block';
+
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        CLUES.length, CLUES.length
+      );
+    }
+
+    /* ===== Restart ===== */
+    function restart() {
+      document.getElementById('completion-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'block';
+      init();
+    }
+
+    init();
+  </script>
+</body>
+</html>

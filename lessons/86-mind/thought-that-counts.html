@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>It's the Thought That Counts! — Lesson 86: Mind</title>
+  <link rel="stylesheet" href="../../css/shared.css">
+  <style>
+    .intro-text {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .scenario-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .scenario-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-light);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .scenario-text {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .thought-bubbles {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .thought-bubble {
+      position: relative;
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 18px;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.2s, background 0.2s;
+      user-select: none;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .thought-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 24px;
+      width: 16px;
+      height: 16px;
+      background: inherit;
+      border: inherit;
+      border-width: 0 2px 2px 0;
+      border-radius: 0 0 4px 0;
+      transform: rotate(45deg);
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
+    }
+
+    .thought-bubble:hover {
+      transform: scale(1.02);
+      border-color: var(--primary);
+    }
+
+    .thought-bubble:active {
+      transform: scale(0.98);
+    }
+
+    .thought-bubble.disabled {
+      pointer-events: none;
+      cursor: default;
+    }
+
+    .thought-bubble.correct-reveal {
+      background: #dcfce7;
+      border-color: var(--success);
+    }
+
+    .thought-bubble.correct-reveal::after {
+      background: #dcfce7;
+      border-color: var(--success);
+    }
+
+    .thought-bubble.wrong-reveal {
+      background: #fef2f2;
+      border-color: var(--error);
+    }
+
+    .thought-bubble.wrong-reveal::after {
+      background: #fef2f2;
+      border-color: var(--error);
+    }
+
+    .bubble-dots {
+      display: flex;
+      gap: 4px;
+      margin-top: 8px;
+      padding-left: 10px;
+    }
+
+    .bubble-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+
+    .correct-reveal + .bubble-dots .bubble-dot {
+      background: var(--success);
+    }
+
+    .wrong-reveal + .bubble-dots .bubble-dot {
+      background: var(--error);
+    }
+
+    .phil-category {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: none;
+    }
+
+    .phil-category.show {
+      display: block;
+    }
+
+    .completion-screen {
+      text-align: center;
+      padding: 30px 20px;
+      display: none;
+    }
+
+    .completion-screen .big-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .full-verse {
+      background: #f0fdf4;
+      border-left: 4px solid var(--success);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      margin: 16px 0;
+      line-height: 1.7;
+    }
+
+    .full-verse .ref {
+      display: block;
+      text-align: right;
+      font-style: normal;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-top: 8px;
+    }
+
+    .score-result {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary-dark);
+      margin: 16px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="../../index.html" class="back-link">&larr; All Lessons</a>
+
+    <div class="activity-header">
+      <span class="lesson-tag">Lesson 86 — Mind</span>
+      <h1>It's the Thought That Counts!</h1>
+      <p class="verse-ref">Proverbs 23:7</p>
+    </div>
+
+    <div id="game-screen">
+      <p class="intro-text">
+        As a man thinketh in his heart, so is he! Read each scenario and choose the response that reflects a mind focused on the things of God.
+      </p>
+
+      <div class="score-display">
+        Question <span id="q-num">1</span> of <span id="q-total">8</span>
+      </div>
+      <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
+
+      <div class="scenario-card">
+        <div class="scenario-label">Scenario</div>
+        <div class="scenario-text" id="scenario-text"></div>
+
+        <div class="thought-bubbles" id="thought-bubbles"></div>
+
+        <div class="phil-category" id="phil-category"></div>
+
+        <div class="feedback" id="feedback"></div>
+      </div>
+    </div>
+
+    <div class="completion-screen" id="completion-screen">
+      <div class="big-icon">&#x1F9E0;</div>
+      <h2>Mind Transformed!</h2>
+
+      <div class="full-verse">
+        "For as he thinketh in his heart, so is he."
+        <span class="ref">&mdash; Proverbs 23:7</span>
+      </div>
+
+      <div class="full-verse">
+        "Finally, brethren, whatsoever things are true, whatsoever things are honest, whatsoever things are just, whatsoever things are pure, whatsoever things are lovely, whatsoever things are of good report; if there be any virtue, and if there be any praise, think on these things."
+        <span class="ref">&mdash; Philippians 4:8</span>
+      </div>
+
+      <p class="intro-text">
+        Our thoughts shape who we are. When we fill our minds with things that are true, honest, just, pure, and lovely, God transforms us from the inside out!
+      </p>
+
+      <p class="score-result" id="score-result"></p>
+
+      <button class="btn btn-primary btn-block" onclick="restart()">Try Again</button>
+    </div>
+  </div>
+
+  <script src="../../js/shared.js"></script>
+  <script>
+    var SCENARIOS = [
+      {
+        scenario: 'Your classmate gets a higher grade than you on a test.',
+        wrong: "That's not fair! I bet she cheated.",
+        wrongLabel: 'Jealousy',
+        right: "Good for her! I'll study harder next time.",
+        rightLabel: 'Kindness',
+        category: 'LOVELY'
+      },
+      {
+        scenario: 'A new kid at church sits alone during lunch.',
+        wrong: 'Not my problem. They should make their own friends.',
+        wrongLabel: 'Selfishness',
+        right: 'I should go sit with them and introduce myself.',
+        rightLabel: 'Love',
+        category: 'GOOD REPORT'
+      },
+      {
+        scenario: 'Your friend gets the lead role in the church play, and you got a small part.',
+        wrong: "I deserved that role! I'm not even going to try in my part.",
+        wrongLabel: 'Jealousy',
+        right: "I'm happy for my friend! I'll do my best in my part too.",
+        rightLabel: 'Contentment',
+        category: 'VIRTUE'
+      },
+      {
+        scenario: 'Someone at school says something mean about your clothes.',
+        wrong: "I'll say something even meaner back to them!",
+        wrongLabel: 'Malice',
+        right: "That hurt, but I'll pray for them and not respond with anger.",
+        rightLabel: 'Grace',
+        category: 'PURE'
+      },
+      {
+        scenario: 'Your sibling accidentally breaks your favorite toy.',
+        wrong: "I'm going to break something of theirs so they know how it feels!",
+        wrongLabel: 'Revenge',
+        right: "It was an accident. I forgive them \u2014 things can be replaced.",
+        rightLabel: 'Forgiveness',
+        category: 'JUST'
+      },
+      {
+        scenario: 'You see a younger kid being bullied on the playground.',
+        wrong: "I don't want to get involved. It's not my business.",
+        wrongLabel: 'Indifference',
+        right: 'I should stand up for them and tell an adult.',
+        rightLabel: 'Courage',
+        category: 'HONEST'
+      },
+      {
+        scenario: 'Your parents ask you to do extra chores on a Saturday.',
+        wrong: "This is so unfair! None of my friends have to do this.",
+        wrongLabel: 'Complaining',
+        right: "I'll do it cheerfully \u2014 the Bible says to obey my parents.",
+        rightLabel: 'Obedience',
+        category: 'TRUE'
+      },
+      {
+        scenario: 'A friend shares exciting news about a family vacation.',
+        wrong: 'My family never goes anywhere nice. Must be nice to be rich.',
+        wrongLabel: 'Envy',
+        right: "That sounds amazing! I'm glad you get to go!",
+        rightLabel: 'Joy',
+        category: 'PRAISE'
+      }
+    ];
+
+    var currentIndex = 0;
+    var firstTryCorrect = 0;
+    var usedFirstTry = true;
+    var locked = false;
+
+    function init() {
+      currentIndex = 0;
+      firstTryCorrect = 0;
+      document.getElementById('q-total').textContent = SCENARIOS.length;
+      loadScenario(0);
+    }
+
+    function loadScenario(index) {
+      currentIndex = index;
+      usedFirstTry = true;
+      locked = false;
+
+      var s = SCENARIOS[index];
+      document.getElementById('q-num').textContent = index + 1;
+      document.getElementById('scenario-text').textContent = s.scenario;
+
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        index, SCENARIOS.length
+      );
+
+      // Build the two response options in shuffled order
+      var options = [
+        { text: s.right, correct: true },
+        { text: s.wrong, correct: false }
+      ];
+      options = SSA.shuffle(options);
+
+      var container = document.getElementById('thought-bubbles');
+      container.innerHTML = '';
+
+      options.forEach(function(opt, i) {
+        // Bubble wrapper (holds bubble + dots)
+        var wrapper = document.createElement('div');
+        wrapper.className = 'bubble-wrapper';
+
+        var bubble = document.createElement('div');
+        bubble.className = 'thought-bubble';
+        bubble.textContent = opt.text;
+        bubble.dataset.correct = opt.correct ? 'true' : 'false';
+        bubble.onclick = function() { selectBubble(bubble); };
+
+        var dots = document.createElement('div');
+        dots.className = 'bubble-dots';
+        for (var d = 0; d < 3; d++) {
+          var dot = document.createElement('div');
+          dot.className = 'bubble-dot';
+          dots.appendChild(dot);
+        }
+
+        wrapper.appendChild(bubble);
+        wrapper.appendChild(dots);
+        container.appendChild(wrapper);
+      });
+
+      // Hide category and feedback
+      var catEl = document.getElementById('phil-category');
+      catEl.classList.remove('show');
+      catEl.textContent = '';
+      document.getElementById('feedback').style.display = 'none';
+    }
+
+    function selectBubble(bubbleEl) {
+      if (locked) return;
+
+      var isCorrect = bubbleEl.dataset.correct === 'true';
+      var s = SCENARIOS[currentIndex];
+
+      // Get all bubbles
+      var allBubbles = document.querySelectorAll('.thought-bubble');
+
+      if (isCorrect) {
+        locked = true;
+
+        if (usedFirstTry) {
+          firstTryCorrect++;
+        }
+
+        // Reveal both bubbles
+        allBubbles.forEach(function(b) {
+          b.classList.add('disabled');
+          if (b.dataset.correct === 'true') {
+            b.classList.add('correct-reveal');
+          } else {
+            b.classList.add('wrong-reveal');
+          }
+        });
+
+        // Show Phil 4:8 category
+        var catEl = document.getElementById('phil-category');
+        catEl.textContent = 'Philippians 4:8 \u2014 ' + s.category;
+        catEl.classList.add('show');
+
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          true,
+          "That's the mind of Christ!",
+          0
+        );
+
+        setTimeout(function() {
+          if (currentIndex + 1 < SCENARIOS.length) {
+            loadScenario(currentIndex + 1);
+          } else {
+            showCompletion();
+          }
+        }, 2500);
+      } else {
+        usedFirstTry = false;
+
+        // Flash the wrong one red briefly
+        bubbleEl.classList.add('wrong-reveal');
+        bubbleEl.classList.add('disabled');
+
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          false,
+          'Think again \u2014 what would Philippians 4:8 say?'
+        );
+
+        // Remove the red flash after a moment so they can try again
+        setTimeout(function() {
+          bubbleEl.classList.remove('wrong-reveal');
+          bubbleEl.classList.remove('disabled');
+        }, 1200);
+      }
+    }
+
+    function showCompletion() {
+      document.getElementById('game-screen').style.display = 'none';
+      var screen = document.getElementById('completion-screen');
+      screen.style.display = 'block';
+
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        SCENARIOS.length, SCENARIOS.length
+      );
+
+      document.getElementById('score-result').textContent =
+        firstTryCorrect + ' of ' + SCENARIOS.length + ' correct on first try';
+    }
+
+    function restart() {
+      document.getElementById('completion-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'block';
+      init();
+    }
+
+    init();
+  </script>
+</body>
+</html>
