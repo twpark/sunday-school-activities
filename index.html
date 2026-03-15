@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fix the Inside! — Sunday School Activities</title>
+  <link rel="stylesheet" href="css/shared.css">
+  <style>
+    .hub-header {
+      text-align: center;
+      padding: 32px 0 24px;
+    }
+
+    .hub-header h1 {
+      font-size: 2rem;
+      margin-bottom: 4px;
+    }
+
+    .hub-header .subtitle {
+      color: var(--text-light);
+      font-size: 0.95rem;
+    }
+
+    .hub-header .unit-tag {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .lesson-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .lesson-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 20px;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .lesson-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+
+    .lesson-card .lesson-num {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .lesson-card h2 {
+      font-size: 1.15rem;
+      margin: 4px 0;
+    }
+
+    .lesson-card .body-part {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-bottom: 8px;
+    }
+
+    .lesson-card .activities {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .activity-link {
+      display: inline-block;
+      background: #eff6ff;
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    .activity-link:hover { background: #dbeafe; }
+
+    .activity-link.coming-soon {
+      background: #f1f5f9;
+      color: var(--text-light);
+      pointer-events: none;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 32px 0;
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+  </style>
+</head>
+<body>
+  <div class="container" style="max-width: 600px;">
+    <div class="hub-header">
+      <span class="unit-tag">ASTG Unit 7</span>
+      <h1>Fix the Inside!</h1>
+      <p class="subtitle">Interactive activities for Sunday School</p>
+    </div>
+
+    <div class="lesson-grid">
+
+      <div class="lesson-card">
+        <div class="lesson-num">Lesson 79</div>
+        <h2>Heart</h2>
+        <div class="body-part">Proverbs 3:5 — Trust in the Lord with all thine heart</div>
+        <div class="activities">
+          <span class="activity-link coming-soon">Here's My Heart (coming soon)</span>
+        </div>
+      </div>
+
+      <div class="lesson-card">
+        <div class="lesson-num">Lesson 80</div>
+        <h2>Tongue</h2>
+        <div class="body-part">Proverbs 13:3 — He that keepeth his mouth keepeth his life</div>
+        <div class="activities">
+          <span class="activity-link coming-soon">What Did He Say? (coming soon)</span>
+        </div>
+      </div>
+
+      <div class="lesson-card">
+        <div class="lesson-num">Lesson 81</div>
+        <h2>Feet</h2>
+        <div class="body-part">Isaiah 52:7 — How beautiful upon the mountains are the feet</div>
+        <div class="activities">
+          <span class="activity-link coming-soon">Footprint Find (coming soon)</span>
+        </div>
+      </div>
+
+      <div class="lesson-card">
+        <div class="lesson-num">Lesson 82</div>
+        <h2>Hands</h2>
+        <div class="body-part">Ecclesiastes 9:10 — Whatsoever thy hand findeth to do</div>
+        <div class="activities">
+          <span class="activity-link coming-soon">Say It With Hands! (coming soon)</span>
+        </div>
+      </div>
+
+      <div class="lesson-card">
+        <div class="lesson-num">Lesson 83</div>
+        <h2>Ears</h2>
+        <div class="body-part">Proverbs 18:15 — The ear of the wise seeketh knowledge</div>
+        <div class="activities">
+          <a href="lessons/83-ears/break-the-code.html" class="activity-link">Break the Code</a>
+        </div>
+      </div>
+
+      <div class="lesson-card">
+        <div class="lesson-num">Lesson 84</div>
+        <h2>Eyes</h2>
+        <div class="body-part">Psalm 119:37 — Turn away mine eyes from beholding vanity</div>
+        <div class="activities">
+          <a href="lessons/84-eyes/looking-the-right-way.html" class="activity-link">Looking the Right Way</a>
+        </div>
+      </div>
+
+      <div class="lesson-card">
+        <div class="lesson-num">Lesson 85</div>
+        <h2>Will</h2>
+        <div class="body-part">Psalm 143:10 — Teach me to do thy will</div>
+        <div class="activities">
+          <a href="lessons/85-will/easter-egg-builder.html" class="activity-link">Easter Egg Sentence Builder</a>
+        </div>
+      </div>
+
+      <div class="lesson-card">
+        <div class="lesson-num">Lesson 86</div>
+        <h2>Mind</h2>
+        <div class="body-part">Proverbs 23:7 — As he thinketh in his heart, so is he</div>
+        <div class="activities">
+          <span class="activity-link coming-soon">It's the Thought That Counts! (coming soon)</span>
+        </div>
+      </div>
+
+      <div class="lesson-card">
+        <div class="lesson-num">Lesson 87</div>
+        <h2>Relationships</h2>
+        <div class="body-part">Amos 3:3 — Can two walk together, except they be agreed?</div>
+        <div class="activities">
+          <span class="activity-link coming-soon">Right Relationships (coming soon)</span>
+        </div>
+      </div>
+
+      <div class="lesson-card">
+        <div class="lesson-num">Lesson 88</div>
+        <h2>Family</h2>
+        <div class="body-part">Joshua 24:15 — As for me and my house, we will serve the Lord</div>
+        <div class="activities">
+          <span class="activity-link coming-soon">Coming soon</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer">
+      ASTG Unit 7 — Fix the Inside!<br>
+      Interactive activities based on the Apostolic Sunday Teaching Guide
+    </div>
+  </div>
+</body>
+</html>

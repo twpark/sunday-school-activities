@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Easter Egg Sentence Builder — Lesson 85: Will</title>
+  <link rel="stylesheet" href="../../css/shared.css">
+  <style>
+    .egg-container {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      padding: 30px 20px 24px;
+      text-align: center;
+      margin: 0 auto 16px;
+      max-width: 320px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .egg-container::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: repeating-linear-gradient(
+        90deg, #f59e0b 0, #f59e0b 8px, transparent 8px, transparent 14px
+      );
+    }
+
+    .egg-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #92400e;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .scrambled-words {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 0;
+      min-height: 50px;
+    }
+
+    .word-chip {
+      background: white;
+      border: 2px solid #d97706;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.2s;
+      user-select: none;
+    }
+
+    .word-chip:hover { transform: scale(1.05); }
+    .word-chip:active { transform: scale(0.95); }
+    .word-chip.used { opacity: 0.3; pointer-events: none; }
+
+    .sentence-area {
+      background: #fffbeb;
+      border: 2px dashed #d97706;
+      border-radius: var(--radius);
+      padding: 16px;
+      min-height: 70px;
+      margin-bottom: 12px;
+    }
+
+    .sentence-area .label {
+      font-size: 0.75rem;
+      color: #92400e;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .built-sentence {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 36px;
+    }
+
+    .placed-word {
+      background: #fef3c7;
+      border: 2px solid #f59e0b;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .placed-word:hover { transform: scale(1.05); background: #fde68a; }
+
+    .action-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    .action-row .btn { font-size: 0.9rem; padding: 8px 16px; }
+
+    .sentence-counter {
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    .completed-sentences {
+      margin-top: 16px;
+    }
+
+    .completed-sentence {
+      background: #f0fdf4;
+      border-left: 3px solid var(--success);
+      padding: 10px 14px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 8px;
+      font-style: italic;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .completed-sentence .ref {
+      font-style: normal;
+      font-weight: 600;
+      color: var(--text-light);
+      font-size: 0.8rem;
+    }
+
+    .completion-screen {
+      text-align: center;
+      padding: 30px 20px;
+      display: none;
+    }
+
+    .completion-screen .big-icon { font-size: 3rem; margin-bottom: 12px; }
+
+    .full-verse {
+      background: #f0fdf4;
+      border-left: 4px solid var(--success);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      margin: 16px 0;
+      line-height: 1.7;
+    }
+
+    .full-verse .ref {
+      display: block;
+      text-align: right;
+      font-style: normal;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-top: 8px;
+    }
+
+    .intro-text {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="../../index.html" class="back-link">&larr; All Lessons</a>
+
+    <div class="activity-header">
+      <span class="lesson-tag">Lesson 85 — Will</span>
+      <h1>Easter Egg Sentence Builder</h1>
+      <p class="verse-ref">Psalm 143:10</p>
+    </div>
+
+    <div id="game-screen">
+      <p class="intro-text">
+        Each egg contains scrambled words from a Scripture verse about the Easter story.
+        Tap the words in the right order to build each sentence!
+      </p>
+
+      <div class="sentence-counter">
+        Sentence <span id="sent-num">1</span> of <span id="sent-total">0</span>
+      </div>
+      <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
+
+      <div class="egg-container">
+        <div class="egg-label" id="egg-label">Crack the Egg!</div>
+        <div class="scrambled-words" id="scrambled-words"></div>
+      </div>
+
+      <div class="card">
+        <div class="sentence-area">
+          <div class="label">Build the sentence:</div>
+          <div class="built-sentence" id="built-sentence"></div>
+        </div>
+
+        <div class="action-row">
+          <button class="btn btn-outline" onclick="clearSentence()">Clear</button>
+          <button class="btn btn-primary" onclick="checkSentence()">Check</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+      </div>
+
+      <div class="completed-sentences" id="completed-sentences"></div>
+    </div>
+
+    <div class="completion-screen" id="completion-screen">
+      <div class="big-icon">&#x1F95A;</div>
+      <h2>All Eggs Cracked!</h2>
+      <p>You assembled the Easter story from Scripture:</p>
+
+      <div id="all-verses"></div>
+
+      <p class="intro-text">
+        Just as you had to put these words in God's order — not your own —
+        we must submit our will to God's plan. Jesus said
+        "Not my will, but thine, be done." His willing sacrifice
+        made our salvation possible.
+      </p>
+
+      <button class="btn btn-primary btn-block" onclick="restart()">Try Again</button>
+    </div>
+  </div>
+
+  <script src="../../js/shared.js"></script>
+  <script>
+    // Scripture sentences about the Easter story — from the PDF activity
+    const SENTENCES = [
+      {
+        text: 'For God so loved the world that he gave his only begotten Son',
+        ref: 'John 3:16'
+      },
+      {
+        text: 'Nevertheless not my will but thine be done',
+        ref: 'Luke 22:42'
+      },
+      {
+        text: 'He is not here but is risen',
+        ref: 'Luke 24:6'
+      },
+      {
+        text: 'I am the resurrection and the life',
+        ref: 'John 11:25'
+      },
+      {
+        text: 'But he was wounded for our transgressions',
+        ref: 'Isaiah 53:5'
+      }
+    ];
+
+    let currentSentenceIndex = 0;
+    let placedWords = [];
+    let scrambledOrder = [];
+
+    function init() {
+      document.getElementById('sent-total').textContent = SENTENCES.length;
+      loadSentence(0);
+    }
+
+    function loadSentence(index) {
+      currentSentenceIndex = index;
+      placedWords = [];
+
+      const sentence = SENTENCES[index];
+      const words = sentence.text.split(' ');
+      scrambledOrder = SSA.shuffle(words);
+
+      document.getElementById('sent-num').textContent = index + 1;
+      document.getElementById('egg-label').textContent =
+        'Egg ' + (index + 1) + ' — ' + sentence.ref;
+
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        index, SENTENCES.length
+      );
+
+      renderScrambled();
+      renderBuilt();
+      document.getElementById('feedback').style.display = 'none';
+    }
+
+    function renderScrambled() {
+      const container = document.getElementById('scrambled-words');
+      container.innerHTML = '';
+      scrambledOrder.forEach((word, i) => {
+        const chip = document.createElement('span');
+        chip.className = 'word-chip' + (placedWords.includes(i) ? ' used' : '');
+        chip.textContent = word;
+        chip.onclick = () => addWord(i);
+        chip.id = 'chip-' + i;
+        container.appendChild(chip);
+      });
+    }
+
+    function renderBuilt() {
+      const container = document.getElementById('built-sentence');
+      container.innerHTML = '';
+      placedWords.forEach((scrambledIdx, i) => {
+        const el = document.createElement('span');
+        el.className = 'placed-word';
+        el.textContent = scrambledOrder[scrambledIdx];
+        el.onclick = () => removeWord(i);
+        container.appendChild(el);
+      });
+    }
+
+    function addWord(scrambledIdx) {
+      if (placedWords.includes(scrambledIdx)) return;
+      placedWords.push(scrambledIdx);
+
+      const chip = document.getElementById('chip-' + scrambledIdx);
+      chip.classList.add('used');
+
+      renderBuilt();
+    }
+
+    function removeWord(placedIdx) {
+      const scrambledIdx = placedWords[placedIdx];
+      placedWords.splice(placedIdx, 1);
+
+      const chip = document.getElementById('chip-' + scrambledIdx);
+      chip.classList.remove('used');
+
+      renderBuilt();
+    }
+
+    function clearSentence() {
+      placedWords = [];
+      renderScrambled();
+      renderBuilt();
+      document.getElementById('feedback').style.display = 'none';
+    }
+
+    function checkSentence() {
+      const sentence = SENTENCES[currentSentenceIndex];
+      const correctWords = sentence.text.split(' ');
+
+      if (placedWords.length < correctWords.length) {
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          false,
+          'Place all the words first!'
+        );
+        return;
+      }
+
+      const builtSentence = placedWords.map(i => scrambledOrder[i]).join(' ');
+
+      if (builtSentence === sentence.text) {
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          true,
+          'Correct! "' + sentence.ref + '" assembled!',
+          0 // persist
+        );
+
+        // Add to completed list
+        const completedEl = document.getElementById('completed-sentences');
+        const div = document.createElement('div');
+        div.className = 'completed-sentence';
+        div.innerHTML = '"' + sentence.text + '" <span class="ref">— ' + sentence.ref + '</span>';
+        completedEl.appendChild(div);
+
+        setTimeout(() => {
+          if (currentSentenceIndex + 1 < SENTENCES.length) {
+            loadSentence(currentSentenceIndex + 1);
+          } else {
+            showCompletion();
+          }
+        }, 2500);
+      } else {
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          false,
+          'Not quite the right order. Try rearranging the words!'
+        );
+      }
+    }
+
+    function showCompletion() {
+      document.getElementById('game-screen').style.display = 'none';
+      const screen = document.getElementById('completion-screen');
+      screen.style.display = 'block';
+
+      const versesEl = document.getElementById('all-verses');
+      versesEl.innerHTML = '';
+      SENTENCES.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'full-verse';
+        div.innerHTML = '"' + s.text + '."<span class="ref">— ' + s.ref + '</span>';
+        versesEl.appendChild(div);
+      });
+
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        SENTENCES.length, SENTENCES.length
+      );
+    }
+
+    function restart() {
+      document.getElementById('completion-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'block';
+      document.getElementById('completed-sentences').innerHTML = '';
+      loadSentence(0);
+    }
+
+    init();
+  </script>
+</body>
+</html>

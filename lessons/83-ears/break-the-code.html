@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Break the Code — Lesson 83: Ears</title>
+  <link rel="stylesheet" href="../../css/shared.css">
+  <style>
+    .morse-chart {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .morse-entry {
+      background: #f1f5f9;
+      border-radius: 6px;
+      padding: 4px 6px;
+      text-align: center;
+      font-family: monospace;
+      font-size: 0.8rem;
+      line-height: 1.3;
+    }
+
+    .morse-entry .letter {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--primary);
+    }
+
+    .verse-display {
+      text-align: center;
+      margin: 16px 0;
+      min-height: 60px;
+    }
+
+    .decoded-words {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .decoded-word {
+      background: #dbeafe;
+      color: var(--primary-dark);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+    }
+
+    .decoded-word.pending {
+      background: #e2e8f0;
+      color: transparent;
+      min-width: 60px;
+    }
+
+    .current-word-label {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-bottom: 8px;
+    }
+
+    .morse-puzzle {
+      background: #f8fafc;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .morse-clue {
+      font-family: monospace;
+      font-size: 1.3rem;
+      letter-spacing: 4px;
+      margin-bottom: 12px;
+      word-break: break-all;
+    }
+
+    .letter-slots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .letter-slot {
+      width: 36px;
+      height: 42px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: white;
+      transition: border-color 0.2s;
+    }
+
+    .letter-slot.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+    }
+
+    .letter-slot.filled {
+      background: #dbeafe;
+      border-color: var(--primary);
+      color: var(--primary-dark);
+    }
+
+    .letter-buttons {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    .letter-btn {
+      padding: 10px 2px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .letter-btn:hover { background: #e2e8f0; }
+    .letter-btn:active { background: #dbeafe; }
+
+    .action-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .action-row .btn { font-size: 0.9rem; padding: 8px 16px; }
+
+    .completion-screen {
+      text-align: center;
+      padding: 30px 20px;
+      display: none;
+    }
+
+    .completion-screen .big-icon { font-size: 3rem; margin-bottom: 12px; }
+    .completion-screen h2 { margin-bottom: 8px; }
+
+    .full-verse {
+      background: #f0fdf4;
+      border-left: 4px solid var(--success);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      margin: 16px 0;
+      line-height: 1.7;
+    }
+
+    .full-verse .ref {
+      display: block;
+      text-align: right;
+      font-style: normal;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-top: 8px;
+    }
+
+    .intro-text {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="../../index.html" class="back-link">&larr; All Lessons</a>
+
+    <div class="activity-header">
+      <span class="lesson-tag">Lesson 83 — Ears</span>
+      <h1>Break the Code</h1>
+      <p class="verse-ref">Proverbs 18:15</p>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen">
+      <p class="intro-text">
+        Use the Morse code chart to decode a special message about what your ears should be tuned to!
+      </p>
+
+      <div class="card">
+        <h2>Morse Code Chart</h2>
+        <div class="morse-chart" id="morse-chart"></div>
+      </div>
+
+      <div class="score-display">
+        Word <span id="word-num">1</span> of <span id="word-total">0</span>
+      </div>
+      <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
+
+      <div class="verse-display">
+        <div class="decoded-words" id="decoded-words"></div>
+      </div>
+
+      <div class="card">
+        <div class="current-word-label">Decode this word:</div>
+        <div class="morse-puzzle">
+          <div class="morse-clue" id="morse-clue"></div>
+          <div class="letter-slots" id="letter-slots"></div>
+        </div>
+
+        <div class="letter-buttons" id="letter-buttons"></div>
+
+        <div class="action-row">
+          <button class="btn btn-outline" onclick="clearCurrent()">Clear</button>
+          <button class="btn btn-primary" onclick="submitWord()">Check</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+      </div>
+    </div>
+
+    <!-- Completion Screen -->
+    <div class="completion-screen" id="completion-screen">
+      <div class="big-icon">&#x1F3A7;</div>
+      <h2>Message Decoded!</h2>
+      <p>You cracked the Morse code and found this message:</p>
+
+      <div class="full-verse">
+        <span id="full-verse-text"></span>
+        <span class="ref" id="full-verse-ref"></span>
+      </div>
+
+      <p class="intro-text">
+        God wants us to tune our ears to His voice. Just like decoding Morse code
+        requires careful listening, we need to carefully listen to what God is telling us
+        through His Word.
+      </p>
+
+      <button class="btn btn-primary btn-block" onclick="restart()">Decode Again</button>
+    </div>
+  </div>
+
+  <script src="../../js/shared.js"></script>
+  <script>
+    const MORSE = {
+      A: '.-', B: '-...', C: '-.-.', D: '-..', E: '.', F: '..-.',
+      G: '--.', H: '....', I: '..', J: '.---', K: '-.-', L: '.-..',
+      M: '--', N: '-.', O: '---', P: '.--.', Q: '--.-', R: '.-.',
+      S: '...', T: '-', U: '..-', V: '...-', W: '.--', X: '-..-',
+      Y: '-.--', Z: '--..'
+    };
+
+    // Psalm 85:8 KJV — the verse from the PDF worksheet
+    const VERSE_TEXT = 'I will hear what God the Lord will speak';
+    const VERSE_REF = 'Psalm 85:8';
+    const WORDS = VERSE_TEXT.toUpperCase().split(' ');
+
+    let currentWordIndex = 0;
+    let currentSlotIndex = 0;
+    let currentGuess = [];
+
+    function init() {
+      buildMorseChart();
+      buildLetterButtons();
+      document.getElementById('word-total').textContent = WORDS.length;
+      renderDecodedWords();
+      loadWord(0);
+    }
+
+    function buildMorseChart() {
+      const chart = document.getElementById('morse-chart');
+      chart.innerHTML = '';
+      for (const [letter, code] of Object.entries(MORSE)) {
+        const el = document.createElement('div');
+        el.className = 'morse-entry';
+        el.innerHTML = `<span class="letter">${letter}</span><br>${code}`;
+        chart.appendChild(el);
+      }
+    }
+
+    function buildLetterButtons() {
+      const container = document.getElementById('letter-buttons');
+      container.innerHTML = '';
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(letter => {
+        const btn = document.createElement('button');
+        btn.className = 'letter-btn';
+        btn.textContent = letter;
+        btn.onclick = () => pickLetter(letter);
+        container.appendChild(btn);
+      });
+    }
+
+    function renderDecodedWords() {
+      const container = document.getElementById('decoded-words');
+      container.innerHTML = '';
+      WORDS.forEach((word, i) => {
+        const el = document.createElement('span');
+        el.className = 'decoded-word' + (i >= currentWordIndex ? ' pending' : '');
+        el.textContent = i < currentWordIndex ? word : '\u00A0'.repeat(word.length);
+        el.id = 'dw-' + i;
+        container.appendChild(el);
+      });
+    }
+
+    function loadWord(index) {
+      currentWordIndex = index;
+      currentSlotIndex = 0;
+      currentGuess = [];
+
+      const word = WORDS[index];
+      document.getElementById('word-num').textContent = index + 1;
+
+      // Build morse clue: each letter's morse separated by " / "
+      const morseStr = word.split('').map(c => MORSE[c]).join('  /  ');
+      document.getElementById('morse-clue').textContent = morseStr;
+
+      // Build letter slots
+      const slotsContainer = document.getElementById('letter-slots');
+      slotsContainer.innerHTML = '';
+      for (let i = 0; i < word.length; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'letter-slot' + (i === 0 ? ' active' : '');
+        slot.id = 'slot-' + i;
+        slotsContainer.appendChild(slot);
+      }
+
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        index, WORDS.length
+      );
+    }
+
+    function pickLetter(letter) {
+      const word = WORDS[currentWordIndex];
+      if (currentSlotIndex >= word.length) return;
+
+      currentGuess.push(letter);
+      const slot = document.getElementById('slot-' + currentSlotIndex);
+      slot.textContent = letter;
+      slot.classList.add('filled');
+      slot.classList.remove('active');
+
+      currentSlotIndex++;
+      if (currentSlotIndex < word.length) {
+        document.getElementById('slot-' + currentSlotIndex).classList.add('active');
+      }
+    }
+
+    function clearCurrent() {
+      const word = WORDS[currentWordIndex];
+      currentSlotIndex = 0;
+      currentGuess = [];
+      for (let i = 0; i < word.length; i++) {
+        const slot = document.getElementById('slot-' + i);
+        slot.textContent = '';
+        slot.className = 'letter-slot' + (i === 0 ? ' active' : '');
+      }
+      document.getElementById('feedback').style.display = 'none';
+    }
+
+    function submitWord() {
+      const word = WORDS[currentWordIndex];
+      const guess = currentGuess.join('');
+
+      if (guess.length < word.length) {
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          false,
+          'Fill in all the letters first!'
+        );
+        return;
+      }
+
+      if (guess === word) {
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          true,
+          'Correct! "' + word + '" decoded!'
+        );
+
+        // Reveal the decoded word
+        const dw = document.getElementById('dw-' + currentWordIndex);
+        dw.textContent = word;
+        dw.classList.remove('pending');
+
+        setTimeout(() => {
+          if (currentWordIndex + 1 < WORDS.length) {
+            loadWord(currentWordIndex + 1);
+            renderDecodedWords();
+            document.getElementById('feedback').style.display = 'none';
+          } else {
+            showCompletion();
+          }
+        }, 2500);
+      } else {
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          false,
+          'Not quite — check the Morse chart and try again!'
+        );
+        setTimeout(() => clearCurrent(), 2500);
+      }
+    }
+
+    function showCompletion() {
+      document.getElementById('game-screen').style.display = 'none';
+      const screen = document.getElementById('completion-screen');
+      screen.style.display = 'block';
+      document.getElementById('full-verse-text').textContent =
+        VERSE_TEXT.charAt(0).toUpperCase() + VERSE_TEXT.slice(1) + '.';
+      document.getElementById('full-verse-ref').textContent = '— ' + VERSE_REF;
+
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        WORDS.length, WORDS.length
+      );
+    }
+
+    function restart() {
+      document.getElementById('completion-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'block';
+      currentWordIndex = 0;
+      renderDecodedWords();
+      loadWord(0);
+    }
+
+    init();
+  </script>
+</body>
+</html>

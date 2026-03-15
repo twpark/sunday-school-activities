@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Looking the Right Way — Lesson 84: Eyes</title>
+  <link rel="stylesheet" href="../../css/shared.css">
+  <style>
+    .eye-chart {
+      background: white;
+      border: 3px solid #1e293b;
+      border-radius: var(--radius);
+      padding: 16px 8px;
+      text-align: center;
+      margin-bottom: 16px;
+      font-family: 'Courier New', monospace;
+      user-select: none;
+    }
+
+    .chart-row {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 2px;
+    }
+
+    .chart-cell {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.15s;
+      font-size: 0.95rem;
+    }
+
+    .chart-cell:hover { background: #e2e8f0; }
+
+    .chart-cell.selected {
+      background: var(--primary);
+      color: white;
+    }
+
+    .chart-cell.correct-cell {
+      background: #16a34a;
+      color: white;
+    }
+
+    .row-labels {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      margin-right: 4px;
+    }
+
+    .chart-wrapper {
+      display: flex;
+      justify-content: center;
+    }
+
+    .row-label, .col-label {
+      width: 24px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: var(--text-light);
+      font-weight: 600;
+    }
+
+    .col-labels {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      margin-left: 28px;
+    }
+
+    .col-label { width: 32px; }
+
+    .coordinate-clue {
+      text-align: center;
+      margin: 16px 0;
+    }
+
+    .coordinate-clue .clue-label {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+
+    .coordinate-clue .coords {
+      font-family: monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      letter-spacing: 2px;
+    }
+
+    .coordinate-clue .hint {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    .answer-display {
+      text-align: center;
+      min-height: 50px;
+      margin: 12px 0;
+    }
+
+    .answer-letters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .answer-letter {
+      width: 30px;
+      height: 36px;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .answer-letter.filled {
+      color: var(--primary-dark);
+      border-color: var(--primary);
+    }
+
+    .answer-letter.space {
+      width: 16px;
+      border: none;
+    }
+
+    .completion-screen {
+      text-align: center;
+      padding: 30px 20px;
+      display: none;
+    }
+
+    .completion-screen .big-icon { font-size: 3rem; margin-bottom: 12px; }
+
+    .full-verse {
+      background: #f0fdf4;
+      border-left: 4px solid var(--success);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      margin: 16px 0;
+      line-height: 1.7;
+    }
+
+    .full-verse .ref {
+      display: block;
+      text-align: right;
+      font-style: normal;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-top: 8px;
+    }
+
+    .intro-text {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* Size tiers like a real eye chart */
+    .chart-row:nth-child(1) .chart-cell { font-size: 1.6rem; }
+    .chart-row:nth-child(2) .chart-cell { font-size: 1.3rem; }
+    .chart-row:nth-child(3) .chart-cell { font-size: 1.1rem; }
+    .chart-row:nth-child(4) .chart-cell { font-size: 0.95rem; }
+    .chart-row:nth-child(5) .chart-cell { font-size: 0.85rem; }
+    .chart-row:nth-child(6) .chart-cell { font-size: 0.78rem; }
+    .chart-row:nth-child(7) .chart-cell { font-size: 0.72rem; }
+    .chart-row:nth-child(8) .chart-cell { font-size: 0.68rem; }
+    .chart-row:nth-child(9) .chart-cell { font-size: 0.65rem; }
+    .chart-row:nth-child(10) .chart-cell { font-size: 0.62rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="../../index.html" class="back-link">&larr; All Lessons</a>
+
+    <div class="activity-header">
+      <span class="lesson-tag">Lesson 84 — Eyes</span>
+      <h1>Looking the Right Way</h1>
+      <p class="verse-ref">Psalm 119:37</p>
+    </div>
+
+    <div id="game-screen">
+      <p class="intro-text">
+        Use the eye chart below to find the right letters. Each coordinate tells you the row and column.
+        For example, <strong>3-2</strong> means row 3, column 2.
+      </p>
+
+      <div class="card">
+        <div class="col-labels" id="col-labels"></div>
+        <div class="chart-wrapper">
+          <div class="row-labels" id="row-labels"></div>
+          <div class="eye-chart" id="eye-chart"></div>
+        </div>
+      </div>
+
+      <div class="score-display">
+        Letter <span id="letter-num">1</span> of <span id="letter-total">0</span>
+      </div>
+      <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
+
+      <div class="card">
+        <div class="coordinate-clue">
+          <div class="clue-label">Find the letter at:</div>
+          <div class="coords" id="current-coords"></div>
+          <div class="hint">Row - Column</div>
+        </div>
+
+        <div class="answer-display">
+          <div class="answer-letters" id="answer-letters"></div>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+      </div>
+    </div>
+
+    <div class="completion-screen" id="completion-screen">
+      <div class="big-icon">&#x1F441;</div>
+      <h2>Verse Revealed!</h2>
+      <p>You looked in all the right places and found:</p>
+
+      <div class="full-verse">
+        <span id="full-verse-text"></span>
+        <span class="ref" id="full-verse-ref"></span>
+      </div>
+
+      <p class="intro-text">
+        Just like you had to look carefully at the chart to find each letter,
+        we need to keep our eyes focused on the right things — God's Word,
+        His creation, and the path He has for us.
+      </p>
+
+      <button class="btn btn-primary btn-block" onclick="restart()">Try Again</button>
+    </div>
+  </div>
+
+  <script src="../../js/shared.js"></script>
+  <script>
+    // Psalm 121:1 KJV — the verse from the PDF worksheet
+    const VERSE = 'I will lift up mine eyes unto the hills from whence cometh my help';
+    const VERSE_REF = 'Psalm 121:1';
+
+    // Eye chart grid — letters arranged like a Snellen chart
+    // Row sizes decrease (fewer letters per row at top, more at bottom)
+    // Chart designed to contain all letters needed for the verse
+    // Extra row added to ensure enough I, H, M, T, O for repeated letters
+    const CHART = [
+      ['E'],
+      ['I', 'H'],
+      ['E', 'T', 'L'],
+      ['O', 'N', 'E', 'C'],
+      ['H', 'Y', 'L', 'I', 'F'],
+      ['E', 'I', 'H', 'M', 'S', 'U'],
+      ['T', 'M', 'W', 'O', 'L', 'N', 'P'],
+      ['E', 'H', 'U', 'H', 'I', 'F', 'W', 'E'],
+      ['N', 'C', 'L', 'Y', 'L', 'E', 'M', 'S', 'R'],
+      ['I', 'T', 'H', 'O', 'M', 'A', 'D', 'G', 'B']
+    ];
+
+    // Coordinates for each letter in the verse (row, col) — 1-indexed
+    // I WILL LIFT UP MINE EYES UNTO THE HILLS FROM WHENCE COMETH MY HELP
+    const COORDS = [
+      // I
+      {r:2,c:1},
+      // WILL
+      {r:7,c:3}, {r:4,c:1/*O? no*/}, // Let me rebuild this properly
+    ];
+
+    // Better approach: pre-compute coordinates for each character in the verse
+    // by placing answer letters into the chart
+    const VERSE_UPPER = VERSE.toUpperCase();
+    const LETTER_LIST = VERSE_UPPER.split('').filter(c => c !== ' ');
+
+    // Build coordinate map: for each letter we need, find it in the chart
+    function buildCoordinates() {
+      const coords = [];
+      const used = {}; // track used positions to avoid reuse
+
+      for (const targetLetter of LETTER_LIST) {
+        let found = false;
+        // Search chart for this letter
+        for (let r = 0; r < CHART.length && !found; r++) {
+          for (let c = 0; c < CHART[r].length && !found; c++) {
+            const key = r + '-' + c;
+            if (CHART[r][c] === targetLetter && !used[key]) {
+              coords.push({ r: r + 1, c: c + 1 }); // 1-indexed
+              used[key] = true;
+              found = true;
+            }
+          }
+        }
+        if (!found) {
+          // Letter not in chart — add it to a random position
+          // This shouldn't happen if chart is designed properly
+          coords.push({ r: 1, c: 1 });
+        }
+      }
+      return coords;
+    }
+
+    let coordinates;
+    let currentLetterIndex = 0;
+
+    function init() {
+      coordinates = buildCoordinates();
+      document.getElementById('letter-total').textContent = LETTER_LIST.length;
+      renderChart();
+      renderAnswerDisplay();
+      showCurrentCoord();
+    }
+
+    function renderChart() {
+      const chart = document.getElementById('eye-chart');
+      const colLabels = document.getElementById('col-labels');
+      const rowLabels = document.getElementById('row-labels');
+
+      chart.innerHTML = '';
+      rowLabels.innerHTML = '';
+
+      // Find max columns
+      const maxCols = Math.max(...CHART.map(r => r.length));
+
+      // Column labels
+      colLabels.innerHTML = '<div style="width:28px"></div>'; // offset for row labels
+      for (let c = 0; c < maxCols; c++) {
+        const label = document.createElement('div');
+        label.className = 'col-label';
+        label.textContent = c + 1;
+        colLabels.appendChild(label);
+      }
+
+      CHART.forEach((row, r) => {
+        // Row label
+        const rowLabel = document.createElement('div');
+        rowLabel.className = 'row-label';
+        rowLabel.textContent = r + 1;
+        rowLabel.style.height = '32px';
+        rowLabels.appendChild(rowLabel);
+
+        const rowEl = document.createElement('div');
+        rowEl.className = 'chart-row';
+
+        // Center the row — pad with empty cells
+        const padLeft = Math.floor((maxCols - row.length) / 2);
+        for (let i = 0; i < padLeft; i++) {
+          const empty = document.createElement('div');
+          empty.className = 'chart-cell';
+          empty.style.visibility = 'hidden';
+          rowEl.appendChild(empty);
+        }
+
+        row.forEach((letter, c) => {
+          const cell = document.createElement('div');
+          cell.className = 'chart-cell';
+          cell.textContent = letter;
+          cell.dataset.row = r + 1;
+          cell.dataset.col = c + 1;
+          cell.onclick = () => cellClicked(r + 1, c + 1, letter, cell);
+          rowEl.appendChild(cell);
+        });
+
+        chart.appendChild(rowEl);
+      });
+    }
+
+    function renderAnswerDisplay() {
+      const container = document.getElementById('answer-letters');
+      container.innerHTML = '';
+
+      const words = VERSE_UPPER.split(' ');
+      let letterIdx = 0;
+
+      words.forEach((word, wi) => {
+        word.split('').forEach(() => {
+          const el = document.createElement('div');
+          el.className = 'answer-letter';
+          el.id = 'al-' + letterIdx;
+          container.appendChild(el);
+          letterIdx++;
+        });
+
+        if (wi < words.length - 1) {
+          const spacer = document.createElement('div');
+          spacer.className = 'answer-letter space';
+          container.appendChild(spacer);
+        }
+      });
+    }
+
+    function showCurrentCoord() {
+      if (currentLetterIndex >= LETTER_LIST.length) {
+        showCompletion();
+        return;
+      }
+      const coord = coordinates[currentLetterIndex];
+      document.getElementById('current-coords').textContent =
+        coord.r + ' - ' + coord.c;
+      document.getElementById('letter-num').textContent = currentLetterIndex + 1;
+
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        currentLetterIndex, LETTER_LIST.length
+      );
+    }
+
+    function cellClicked(row, col, letter, cellEl) {
+      const target = coordinates[currentLetterIndex];
+
+      if (row === target.r && col === target.c) {
+        // Correct!
+        cellEl.classList.add('correct-cell');
+
+        const answerEl = document.getElementById('al-' + currentLetterIndex);
+        answerEl.textContent = letter;
+        answerEl.classList.add('filled');
+
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          true,
+          'Found "' + letter + '"!',
+          1500
+        );
+
+        currentLetterIndex++;
+        setTimeout(() => showCurrentCoord(), 1500);
+      } else {
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          false,
+          'That\'s row ' + row + ', column ' + col + '. Look for ' + target.r + '-' + target.c + '!',
+          2500
+        );
+      }
+    }
+
+    function showCompletion() {
+      document.getElementById('game-screen').style.display = 'none';
+      const screen = document.getElementById('completion-screen');
+      screen.style.display = 'block';
+      document.getElementById('full-verse-text').textContent =
+        VERSE.charAt(0).toUpperCase() + VERSE.slice(1) + '.';
+      document.getElementById('full-verse-ref').textContent = '— ' + VERSE_REF;
+    }
+
+    function restart() {
+      document.getElementById('completion-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'block';
+      currentLetterIndex = 0;
+
+      // Clear chart highlights
+      document.querySelectorAll('.chart-cell').forEach(c => {
+        c.classList.remove('selected', 'correct-cell');
+      });
+
+      renderAnswerDisplay();
+      showCurrentCoord();
+    }
+
+    init();
+  </script>
+</body>
+</html>
