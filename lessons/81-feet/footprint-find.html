@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Footprint Find — Lesson 81: Feet</title>
+  <link rel="stylesheet" href="../../css/shared.css">
+  <style>
+    .intro-text {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* Word Search Grid */
+    .grid-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-bottom: 16px;
+    }
+
+    .ws-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 30px);
+      grid-template-rows: repeat(12, 30px);
+      gap: 2px;
+      margin: 0 auto;
+      width: fit-content;
+      user-select: none;
+    }
+
+    .ws-cell {
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .ws-cell:hover {
+      background: #f1f5f9;
+    }
+
+    .ws-cell.selected {
+      background: #dbeafe;
+      border-color: var(--primary);
+    }
+
+    .ws-cell.start-cell {
+      background: #bfdbfe;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+    }
+
+    .ws-cell.found {
+      background: #dcfce7;
+      border-color: #86efac;
+      color: var(--success);
+    }
+
+    .ws-cell.invalid-flash {
+      background: #fef2f2;
+      border-color: var(--error);
+    }
+
+    /* Word List */
+    .word-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .word-tag {
+      padding: 6px 12px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: all 0.3s;
+    }
+
+    .word-tag.found {
+      border-color: var(--success);
+      background: #dcfce7;
+      color: var(--success);
+      text-decoration: line-through;
+    }
+
+    /* Completion Screen */
+    .completion-screen {
+      text-align: center;
+      padding: 30px 20px;
+      display: none;
+    }
+
+    .completion-screen .big-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .completion-screen h2 {
+      margin-bottom: 8px;
+    }
+
+    .full-verse {
+      background: #f0fdf4;
+      border-left: 4px solid var(--success);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      margin: 16px 0;
+      line-height: 1.7;
+    }
+
+    .full-verse .ref {
+      display: block;
+      text-align: right;
+      font-style: normal;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-top: 8px;
+    }
+
+    .selection-hint {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 8px;
+      min-height: 1.2em;
+    }
+
+    @media (min-width: 600px) {
+      .ws-grid {
+        grid-template-columns: repeat(12, 36px);
+        grid-template-rows: repeat(12, 36px);
+      }
+
+      .ws-cell {
+        width: 36px;
+        height: 36px;
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="../../index.html" class="back-link">&larr; All Lessons</a>
+
+    <div class="activity-header">
+      <span class="lesson-tag">Lesson 81 &mdash; Feet</span>
+      <h1>Footprint Find</h1>
+      <p class="verse-ref">Isaiah 52:7</p>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen">
+      <p class="intro-text">
+        Find and circle each word from Isaiah 52:7 hidden in the puzzle.
+        Words may go across (left to right) or down (top to bottom).
+      </p>
+
+      <div class="score-display">
+        <span id="found-count">0</span> of <span id="word-total">0</span> words found
+      </div>
+      <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
+
+      <div class="card">
+        <p class="selection-hint" id="selection-hint">Tap the first letter of a word</p>
+        <div class="grid-wrapper">
+          <div class="ws-grid" id="ws-grid"></div>
+        </div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+
+      <div class="card">
+        <h2>Words to Find</h2>
+        <div class="word-list" id="word-list"></div>
+      </div>
+    </div>
+
+    <!-- Completion Screen -->
+    <div class="completion-screen" id="completion-screen">
+      <div class="big-icon">&#x1F463;</div>
+      <h2>All Words Found!</h2>
+      <p>You found every word from Isaiah 52:7!</p>
+
+      <div class="full-verse">
+        &ldquo;How beautiful upon the mountains are the feet of him that bringeth good tidings, that publisheth peace; that bringeth good tidings of good, that publisheth salvation; that saith unto Zion, Thy God reigneth!&rdquo;
+        <span class="ref">&mdash; Isaiah 52:7</span>
+      </div>
+
+      <p class="intro-text">
+        God calls our feet beautiful when we use them to carry the
+        good news of the Gospel to others. Let us go and share
+        the good tidings of salvation!
+      </p>
+
+      <button class="btn btn-primary btn-block" onclick="restart()">Play Again</button>
+    </div>
+  </div>
+
+  <script src="../../js/shared.js"></script>
+  <script>
+    /* ========================================================
+       Word Search — Footprint Find
+       Isaiah 52:7
+       ======================================================== */
+
+    const GRID_SIZE = 12;
+
+    const WORDS = [
+      'BEAUTIFUL', 'MOUNTAINS', 'BRINGETH', 'REIGNETH',
+      'PUBLISHETH', 'SALVATION', 'TIDINGS', 'PEACE',
+      'SAITH', 'UPON', 'GOOD', 'FEET',
+      'ZION', 'UNTO', 'HOW', 'ARE',
+      'HIM', 'GOD'
+    ];
+
+    /* --------------------------------------------------------
+       Grid Generation (deterministic with seeded RNG)
+       -------------------------------------------------------- */
+
+    // Simple seeded pseudo-random number generator (mulberry32)
+    function mulberry32(seed) {
+      return function() {
+        seed |= 0;
+        seed = seed + 0x6D2B79F5 | 0;
+        let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    let rng = mulberry32(52007); // Seed from Isaiah 52:7
+
+    function buildGrid() {
+      rng = mulberry32(52007); // Reset seed for deterministic results
+
+      const grid = Array.from({ length: GRID_SIZE }, () =>
+        Array(GRID_SIZE).fill(null)
+      );
+      const placements = []; // { word, dir, row, col }
+
+      // Sort words by length (longest first) for best placement
+      const sorted = [...WORDS].sort((a, b) => b.length - a.length);
+
+      for (const word of sorted) {
+        const placed = tryPlaceWord(grid, word, placements);
+        if (!placed) {
+          // Fallback: should not happen with a 12x12 grid and these words
+          console.warn('Could not place word:', word);
+        }
+      }
+
+      // Fill empty cells with random consonants (to reduce false matches)
+      const fillers = 'BCDFGHJKLMNPQRSTVWXYZ';
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+          if (grid[r][c] === null) {
+            grid[r][c] = fillers[Math.floor(rng() * fillers.length)];
+          }
+        }
+      }
+
+      return { grid, placements };
+    }
+
+    function tryPlaceWord(grid, word, placements) {
+      // Collect all valid positions, score them, pick the best
+      const candidates = [];
+
+      for (let dir = 0; dir < 2; dir++) { // 0 = across, 1 = down
+        const maxR = dir === 1 ? GRID_SIZE - word.length : GRID_SIZE;
+        const maxC = dir === 0 ? GRID_SIZE - word.length : GRID_SIZE;
+
+        for (let r = 0; r < maxR; r++) {
+          for (let c = 0; c < maxC; c++) {
+            let valid = true;
+            let overlaps = 0;
+
+            for (let i = 0; i < word.length; i++) {
+              const cr = dir === 1 ? r + i : r;
+              const cc = dir === 0 ? c + i : c;
+              const cell = grid[cr][cc];
+
+              if (cell !== null && cell !== word[i]) {
+                valid = false;
+                break;
+              }
+              if (cell === word[i]) {
+                overlaps++;
+              }
+            }
+
+            if (valid) {
+              candidates.push({ dir, row: r, col: c, overlaps });
+            }
+          }
+        }
+      }
+
+      if (candidates.length === 0) return false;
+
+      // Prefer positions with more overlaps, then randomize among ties
+      candidates.sort((a, b) => {
+        if (b.overlaps !== a.overlaps) return b.overlaps - a.overlaps;
+        return rng() - 0.5;
+      });
+
+      // Pick from the top candidates (those with max overlap)
+      const maxOv = candidates[0].overlaps;
+      const top = candidates.filter(c => c.overlaps === maxOv);
+      const pick = top[Math.floor(rng() * top.length)];
+
+      // Place the word
+      for (let i = 0; i < word.length; i++) {
+        const cr = pick.dir === 1 ? pick.row + i : pick.row;
+        const cc = pick.dir === 0 ? pick.col + i : pick.col;
+        grid[cr][cc] = word[i];
+      }
+
+      placements.push({
+        word,
+        dir: pick.dir === 0 ? 'across' : 'down',
+        row: pick.row,
+        col: pick.col
+      });
+
+      return true;
+    }
+
+    /* --------------------------------------------------------
+       Game State
+       -------------------------------------------------------- */
+
+    let gridData = null;     // { grid: char[][], placements: [] }
+    let cellElements = [];   // 2D array of DOM elements
+    let foundWords = new Set();
+    let startCell = null;    // { row, col } or null
+
+    /* --------------------------------------------------------
+       Render Grid
+       -------------------------------------------------------- */
+
+    function renderGrid() {
+      const container = document.getElementById('ws-grid');
+      container.innerHTML = '';
+      cellElements = [];
+
+      for (let r = 0; r < GRID_SIZE; r++) {
+        cellElements[r] = [];
+        for (let c = 0; c < GRID_SIZE; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'ws-cell';
+          cell.textContent = gridData.grid[r][c];
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+          cell.addEventListener('click', () => onCellTap(r, c));
+          container.appendChild(cell);
+          cellElements[r][c] = cell;
+        }
+      }
+    }
+
+    /* --------------------------------------------------------
+       Render Word List
+       -------------------------------------------------------- */
+
+    function renderWordList() {
+      const container = document.getElementById('word-list');
+      container.innerHTML = '';
+
+      // Shuffle the display order
+      const shuffled = SSA.shuffle([...WORDS]);
+
+      shuffled.forEach(word => {
+        const tag = document.createElement('span');
+        tag.className = 'word-tag';
+        tag.textContent = word;
+        tag.id = 'tag-' + word;
+        if (foundWords.has(word)) {
+          tag.classList.add('found');
+        }
+        container.appendChild(tag);
+      });
+    }
+
+    /* --------------------------------------------------------
+       Cell Interaction
+       -------------------------------------------------------- */
+
+    function onCellTap(row, col) {
+      const hint = document.getElementById('selection-hint');
+
+      if (startCell === null) {
+        // First tap: set start cell
+        startCell = { row, col };
+        cellElements[row][col].classList.add('start-cell');
+        hint.textContent = 'Now tap the last letter of the word';
+      } else {
+        // Second tap: attempt to select a word
+        const endCell = { row, col };
+        const result = checkSelection(startCell, endCell);
+
+        // Clear start highlight
+        cellElements[startCell.row][startCell.col].classList.remove('start-cell');
+
+        if (result) {
+          markWordFound(result.word, result.cells);
+        } else {
+          flashInvalid(startCell, endCell);
+          SSA.showFeedback(
+            document.getElementById('feedback'),
+            false,
+            'No word found there. Try again!'
+          );
+        }
+
+        startCell = null;
+        hint.textContent = 'Tap the first letter of a word';
+      }
+    }
+
+    function checkSelection(start, end) {
+      // Must be a horizontal or vertical line
+      const isHorizontal = start.row === end.row && start.col <= end.col;
+      const isVertical = start.col === end.col && start.row <= end.row;
+
+      if (!isHorizontal && !isVertical) return null;
+
+      // Collect letters in the selection
+      const cells = [];
+      let letters = '';
+
+      if (isHorizontal) {
+        for (let c = start.col; c <= end.col; c++) {
+          cells.push({ row: start.row, col: c });
+          letters += gridData.grid[start.row][c];
+        }
+      } else {
+        for (let r = start.row; r <= end.row; r++) {
+          cells.push({ row: r, col: start.col });
+          letters += gridData.grid[r][start.col];
+        }
+      }
+
+      // Check if this matches any unfound word at this exact placement
+      for (const p of gridData.placements) {
+        if (foundWords.has(p.word)) continue;
+
+        if (p.word === letters) {
+          // Verify position matches the actual placement
+          const pDir = p.dir === 'across' ? 'h' : 'v';
+          const selDir = isHorizontal ? 'h' : 'v';
+          if (pDir === selDir && cells[0].row === p.row && cells[0].col === p.col) {
+            return { word: p.word, cells };
+          }
+        }
+      }
+
+      return null;
+    }
+
+    function markWordFound(word, cells) {
+      // Highlight cells
+      cells.forEach(({ row, col }) => {
+        cellElements[row][col].classList.add('found');
+      });
+
+      // Mark in word list
+      const tag = document.getElementById('tag-' + word);
+      if (tag) tag.classList.add('found');
+
+      foundWords.add(word);
+
+      // Update progress
+      const count = foundWords.size;
+      document.getElementById('found-count').textContent = count;
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        count, WORDS.length
+      );
+
+      SSA.showFeedback(
+        document.getElementById('feedback'),
+        true,
+        '"' + word + '" found!'
+      );
+
+      // Check completion
+      if (count === WORDS.length) {
+        setTimeout(() => showCompletion(), 2500);
+      }
+    }
+
+    function flashInvalid(start, end) {
+      const isHorizontal = start.row === end.row;
+      const isVertical = start.col === end.col;
+
+      const cells = [];
+      if (isHorizontal && start.col <= end.col) {
+        for (let c = start.col; c <= end.col; c++) {
+          cells.push(cellElements[start.row][c]);
+        }
+      } else if (isVertical && start.row <= end.row) {
+        for (let r = start.row; r <= end.row; r++) {
+          cells.push(cellElements[r][start.col]);
+        }
+      } else {
+        // Diagonal or reversed — just flash the two cells
+        cells.push(cellElements[start.row][start.col]);
+        cells.push(cellElements[end.row][end.col]);
+      }
+
+      cells.forEach(c => {
+        if (!c.classList.contains('found')) {
+          c.classList.add('invalid-flash');
+        }
+      });
+
+      setTimeout(() => {
+        cells.forEach(c => c.classList.remove('invalid-flash'));
+      }, 600);
+    }
+
+    /* --------------------------------------------------------
+       Completion
+       -------------------------------------------------------- */
+
+    function showCompletion() {
+      document.getElementById('game-screen').style.display = 'none';
+      document.getElementById('completion-screen').style.display = 'block';
+    }
+
+    function restart() {
+      document.getElementById('completion-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'block';
+
+      foundWords = new Set();
+      startCell = null;
+
+      document.getElementById('found-count').textContent = '0';
+      document.getElementById('selection-hint').textContent =
+        'Tap the first letter of a word';
+
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        0, WORDS.length
+      );
+
+      gridData = buildGrid();
+      renderGrid();
+      renderWordList();
+    }
+
+    /* --------------------------------------------------------
+       Init
+       -------------------------------------------------------- */
+
+    function init() {
+      document.getElementById('word-total').textContent = WORDS.length;
+      gridData = buildGrid();
+      renderGrid();
+      renderWordList();
+    }
+
+    init();
+  </script>
+</body>
+</html>

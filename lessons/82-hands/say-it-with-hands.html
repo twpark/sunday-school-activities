@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Say It With Hands! — Lesson 82: Hands</title>
+  <link rel="stylesheet" href="../../css/shared.css">
+  <style>
+    .sign-chart {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+
+    .sign-entry {
+      background: #f1f5f9;
+      border-radius: 6px;
+      padding: 4px 2px;
+      text-align: center;
+      font-size: 0.8rem;
+      line-height: 1.2;
+    }
+
+    .sign-entry .letter {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--primary);
+    }
+
+    .sign-entry .sign-emoji {
+      font-size: 1.2rem;
+      display: block;
+      margin: 2px 0;
+    }
+
+    .chart-toggle {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .chart-toggle button {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .chart-card {
+      transition: max-height 0.3s ease;
+      overflow: hidden;
+    }
+
+    .chart-card.collapsed {
+      max-height: 0;
+      padding: 0 20px;
+      margin-bottom: 0;
+      box-shadow: none;
+    }
+
+    .verse-display {
+      text-align: center;
+      margin: 16px 0;
+      min-height: 60px;
+    }
+
+    .decoded-words {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .decoded-word {
+      background: #dbeafe;
+      color: var(--primary-dark);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+    }
+
+    .decoded-word.pending {
+      background: #e2e8f0;
+      color: transparent;
+      min-width: 60px;
+    }
+
+    .current-word-label {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-bottom: 8px;
+    }
+
+    .sign-puzzle {
+      background: #f8fafc;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .sign-clue {
+      font-size: 1.6rem;
+      letter-spacing: 6px;
+      margin-bottom: 12px;
+      word-break: break-all;
+      line-height: 1.4;
+    }
+
+    .letter-slots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .letter-slot {
+      width: 36px;
+      height: 42px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      background: white;
+      transition: border-color 0.2s;
+    }
+
+    .letter-slot.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+    }
+
+    .letter-slot.filled {
+      background: #dbeafe;
+      border-color: var(--primary);
+      color: var(--primary-dark);
+    }
+
+    .letter-buttons {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    .letter-btn {
+      padding: 10px 2px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .letter-btn:hover { background: #e2e8f0; }
+    .letter-btn:active { background: #dbeafe; }
+
+    .action-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .action-row .btn { font-size: 0.9rem; padding: 8px 16px; }
+
+    .completion-screen {
+      text-align: center;
+      padding: 30px 20px;
+      display: none;
+    }
+
+    .completion-screen .big-icon { font-size: 3rem; margin-bottom: 12px; }
+    .completion-screen h2 { margin-bottom: 8px; }
+
+    .full-verse {
+      background: #f0fdf4;
+      border-left: 4px solid var(--success);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      margin: 16px 0;
+      line-height: 1.7;
+    }
+
+    .full-verse .ref {
+      display: block;
+      text-align: right;
+      font-style: normal;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-top: 8px;
+    }
+
+    .intro-text {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="../../index.html" class="back-link">&larr; All Lessons</a>
+
+    <div class="activity-header">
+      <span class="lesson-tag">Lesson 82 — Hands</span>
+      <h1>Say It With Hands!</h1>
+      <p class="verse-ref">Ecclesiastes 9:10</p>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen">
+      <p class="intro-text">
+        Did you know that hands can "talk"? It's called sign language!
+        Using the sign language chart, decode the verse below letter by letter.
+      </p>
+
+      <div class="chart-toggle">
+        <button id="chart-toggle-btn" onclick="toggleChart()">Hide Chart</button>
+      </div>
+      <div class="card chart-card" id="chart-card">
+        <h2>Sign Language Chart</h2>
+        <div class="sign-chart" id="sign-chart"></div>
+      </div>
+
+      <div class="score-display">
+        Word <span id="word-num">1</span> of <span id="word-total">0</span>
+      </div>
+      <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
+
+      <div class="verse-display">
+        <div class="decoded-words" id="decoded-words"></div>
+      </div>
+
+      <div class="card">
+        <div class="current-word-label">Decode this word:</div>
+        <div class="sign-puzzle">
+          <div class="sign-clue" id="sign-clue"></div>
+          <div class="letter-slots" id="letter-slots"></div>
+        </div>
+
+        <div class="letter-buttons" id="letter-buttons"></div>
+
+        <div class="action-row">
+          <button class="btn btn-outline" onclick="clearCurrent()">Clear</button>
+          <button class="btn btn-primary" onclick="submitWord()">Check</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+      </div>
+    </div>
+
+    <!-- Completion Screen -->
+    <div class="completion-screen" id="completion-screen">
+      <div class="big-icon">&#x1F64F;</div>
+      <h2>Verse Decoded!</h2>
+      <p>You used sign language to uncover this verse:</p>
+
+      <div class="full-verse">
+        <span id="full-verse-text"></span>
+        <span class="ref" id="full-verse-ref"></span>
+      </div>
+
+      <p class="intro-text">
+        Our hands are tools for God's work. Whatever task He gives us
+        &mdash; big or small &mdash; we should do it with all our strength.
+        Like sign language uses hands to communicate, we can use our hands
+        to show God's love through our actions.
+      </p>
+
+      <button class="btn btn-primary btn-block" onclick="restart()">Decode Again</button>
+    </div>
+  </div>
+
+  <script src="../../js/shared.js"></script>
+  <script>
+    // Hand emoji chart — one unique emoji per letter
+    const SIGNS = {
+      A: '\u270A',       // raised fist
+      B: '\u270B',       // raised hand (flat)
+      C: '\u{1F44C}',    // OK hand (curved C)
+      D: '\u261D\uFE0F', // index pointing up
+      E: '\u{1F91A}',    // raised back of hand
+      F: '\u{1F44A}',    // oncoming fist
+      G: '\u{1F44B}',    // waving hand
+      H: '\u{1F590}\uFE0F', // hand with fingers splayed
+      I: '\u{1F446}',    // backhand pointing up
+      J: '\u{1F447}',    // backhand pointing down
+      K: '\u{1F448}',    // backhand pointing left
+      L: '\u{1F449}',    // backhand pointing right
+      M: '\u{1F91E}',    // crossed fingers
+      N: '\u{1F91F}',    // love-you gesture
+      O: '\u{1F44D}',    // thumbs up
+      P: '\u{1F44E}',    // thumbs down
+      Q: '\u{1F919}',    // call me hand
+      R: '\u{1F596}',    // vulcan salute
+      S: '\u270D\uFE0F', // writing hand
+      T: '\u{1F91D}',    // handshake
+      U: '\u{1F44F}',    // clapping hands
+      V: '\u{1F64C}',    // raising hands
+      W: '\u{1F64F}',    // folded hands
+      X: '\u{1F4AA}',    // flexed biceps
+      Y: '\u{1F932}',    // palms up together
+      Z: '\u{1F450}'     // open hands
+    };
+
+    // Ecclesiastes 9:10 KJV (key phrase)
+    const VERSE_TEXT = 'Whatsoever thy hand findeth to do, do it with thy might.';
+    const VERSE_REF = 'Ecclesiastes 9:10';
+    const WORDS = 'WHATSOEVER THY HAND FINDETH TO DO DO IT WITH THY MIGHT'.split(' ');
+
+    let currentWordIndex = 0;
+    let currentSlotIndex = 0;
+    let currentGuess = [];
+
+    function init() {
+      buildSignChart();
+      buildLetterButtons();
+      document.getElementById('word-total').textContent = WORDS.length;
+      renderDecodedWords();
+      loadWord(0);
+    }
+
+    function buildSignChart() {
+      const chart = document.getElementById('sign-chart');
+      chart.innerHTML = '';
+      for (const [letter, emoji] of Object.entries(SIGNS)) {
+        const el = document.createElement('div');
+        el.className = 'sign-entry';
+        el.innerHTML =
+          '<span class="letter">' + letter + '</span>' +
+          '<span class="sign-emoji">' + emoji + '</span>';
+        chart.appendChild(el);
+      }
+    }
+
+    function toggleChart() {
+      const card = document.getElementById('chart-card');
+      const btn = document.getElementById('chart-toggle-btn');
+      if (card.classList.contains('collapsed')) {
+        card.classList.remove('collapsed');
+        btn.textContent = 'Hide Chart';
+      } else {
+        card.classList.add('collapsed');
+        btn.textContent = 'Show Chart';
+      }
+    }
+
+    function buildLetterButtons() {
+      const container = document.getElementById('letter-buttons');
+      container.innerHTML = '';
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(letter) {
+        var btn = document.createElement('button');
+        btn.className = 'letter-btn';
+        btn.textContent = letter;
+        btn.onclick = function() { pickLetter(letter); };
+        container.appendChild(btn);
+      });
+    }
+
+    function renderDecodedWords() {
+      const container = document.getElementById('decoded-words');
+      container.innerHTML = '';
+      WORDS.forEach(function(word, i) {
+        var el = document.createElement('span');
+        el.className = 'decoded-word' + (i >= currentWordIndex ? ' pending' : '');
+        el.textContent = i < currentWordIndex ? word : '\u00A0'.repeat(word.length);
+        el.id = 'dw-' + i;
+        container.appendChild(el);
+      });
+    }
+
+    function loadWord(index) {
+      currentWordIndex = index;
+      currentSlotIndex = 0;
+      currentGuess = [];
+
+      var word = WORDS[index];
+      document.getElementById('word-num').textContent = index + 1;
+
+      // Build sign clue: each letter's emoji
+      var signStr = word.split('').map(function(c) { return SIGNS[c]; }).join(' ');
+      document.getElementById('sign-clue').textContent = signStr;
+
+      // Build letter slots
+      var slotsContainer = document.getElementById('letter-slots');
+      slotsContainer.innerHTML = '';
+      for (var i = 0; i < word.length; i++) {
+        var slot = document.createElement('div');
+        slot.className = 'letter-slot' + (i === 0 ? ' active' : '');
+        slot.id = 'slot-' + i;
+        slotsContainer.appendChild(slot);
+      }
+
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        index, WORDS.length
+      );
+    }
+
+    function pickLetter(letter) {
+      var word = WORDS[currentWordIndex];
+      if (currentSlotIndex >= word.length) return;
+
+      currentGuess.push(letter);
+      var slot = document.getElementById('slot-' + currentSlotIndex);
+      slot.textContent = letter;
+      slot.classList.add('filled');
+      slot.classList.remove('active');
+
+      currentSlotIndex++;
+      if (currentSlotIndex < word.length) {
+        document.getElementById('slot-' + currentSlotIndex).classList.add('active');
+      }
+    }
+
+    function clearCurrent() {
+      var word = WORDS[currentWordIndex];
+      currentSlotIndex = 0;
+      currentGuess = [];
+      for (var i = 0; i < word.length; i++) {
+        var slot = document.getElementById('slot-' + i);
+        slot.textContent = '';
+        slot.className = 'letter-slot' + (i === 0 ? ' active' : '');
+      }
+      document.getElementById('feedback').style.display = 'none';
+    }
+
+    function submitWord() {
+      var word = WORDS[currentWordIndex];
+      var guess = currentGuess.join('');
+
+      if (guess.length < word.length) {
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          false,
+          'Fill in all the letters first!'
+        );
+        return;
+      }
+
+      if (guess === word) {
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          true,
+          'Correct! "' + word + '" decoded!'
+        );
+
+        // Reveal the decoded word
+        var dw = document.getElementById('dw-' + currentWordIndex);
+        dw.textContent = word;
+        dw.classList.remove('pending');
+
+        setTimeout(function() {
+          if (currentWordIndex + 1 < WORDS.length) {
+            loadWord(currentWordIndex + 1);
+            renderDecodedWords();
+            document.getElementById('feedback').style.display = 'none';
+          } else {
+            showCompletion();
+          }
+        }, 2500);
+      } else {
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          false,
+          'Not quite \u2014 check the sign chart and try again!'
+        );
+        setTimeout(function() { clearCurrent(); }, 2500);
+      }
+    }
+
+    function showCompletion() {
+      document.getElementById('game-screen').style.display = 'none';
+      var screen = document.getElementById('completion-screen');
+      screen.style.display = 'block';
+      document.getElementById('full-verse-text').textContent = VERSE_TEXT;
+      document.getElementById('full-verse-ref').textContent = '\u2014 ' + VERSE_REF;
+
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        WORDS.length, WORDS.length
+      );
+    }
+
+    function restart() {
+      document.getElementById('completion-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'block';
+      currentWordIndex = 0;
+      renderDecodedWords();
+      loadWord(0);
+    }
+
+    init();
+  </script>
+</body>
+</html>

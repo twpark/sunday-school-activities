@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What Did He Say? — Lesson 80: Tongue</title>
+  <link rel="stylesheet" href="../../css/shared.css">
+  <style>
+    .intro-text {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* Legend / Key Card */
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .legend-symbol {
+      color: var(--primary);
+      font-size: 1.15rem;
+      min-width: 1.2em;
+      text-align: center;
+    }
+
+    .legend-letter {
+      color: var(--text);
+    }
+
+    /* Verse Display */
+    .verse-area {
+      font-size: 1.35rem;
+      line-height: 2.2;
+      text-align: center;
+      padding: 16px 8px;
+      word-spacing: 4px;
+      user-select: none;
+    }
+
+    .consonant {
+      font-weight: 600;
+    }
+
+    .vowel-slot {
+      display: inline-block;
+      cursor: pointer;
+      color: var(--primary);
+      font-size: 1.3em;
+      font-weight: 700;
+      line-height: 1;
+      vertical-align: baseline;
+      transition: transform 0.15s, color 0.2s;
+      position: relative;
+      min-width: 0.7em;
+      text-align: center;
+      border-bottom: 2px dashed var(--primary);
+      padding-bottom: 1px;
+      margin: 0 0.5px;
+    }
+
+    .vowel-slot:active {
+      transform: scale(1.2);
+    }
+
+    .vowel-slot.solved {
+      color: var(--text);
+      font-size: 1em;
+      font-weight: 600;
+      border-bottom: none;
+      cursor: default;
+      animation: revealFlash 0.5s ease;
+    }
+
+    .vowel-slot.wrong {
+      animation: wrongShake 0.4s ease;
+    }
+
+    @keyframes revealFlash {
+      0% { background: rgba(22, 163, 74, 0.35); }
+      100% { background: transparent; }
+    }
+
+    @keyframes wrongShake {
+      0%, 100% { transform: translateX(0); color: var(--primary); }
+      20% { transform: translateX(-3px); color: var(--error); }
+      40% { transform: translateX(3px); color: var(--error); }
+      60% { transform: translateX(-3px); color: var(--error); }
+      80% { transform: translateX(2px); color: var(--error); }
+    }
+
+    .verse-ref-bottom {
+      text-align: center;
+      font-style: italic;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-top: 4px;
+      padding-bottom: 4px;
+    }
+
+    .punctuation {
+      /* just for clarity in code */
+    }
+
+    .space-char {
+      display: inline-block;
+      width: 0.4em;
+    }
+
+    /* Vowel Selector Popup */
+    .vowel-popup {
+      position: absolute;
+      display: none;
+      background: var(--card-bg);
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+      padding: 6px;
+      gap: 4px;
+      z-index: 100;
+      flex-direction: row;
+      border: 2px solid var(--primary);
+    }
+
+    .vowel-popup.visible {
+      display: flex;
+    }
+
+    .vowel-popup-btn {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      font-size: 1.15rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.12s, transform 0.1s;
+      color: var(--text);
+    }
+
+    .vowel-popup-btn:hover {
+      background: #dbeafe;
+    }
+
+    .vowel-popup-btn:active {
+      transform: scale(0.93);
+      background: #bfdbfe;
+    }
+
+    /* Overlay to catch outside clicks */
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 99;
+      display: none;
+    }
+
+    .popup-overlay.visible {
+      display: block;
+    }
+
+    /* Completion Screen */
+    .completion-screen {
+      text-align: center;
+      padding: 30px 20px;
+      display: none;
+    }
+
+    .completion-screen .big-icon { font-size: 3rem; margin-bottom: 12px; }
+    .completion-screen h2 { margin-bottom: 8px; }
+
+    .full-verse {
+      background: #f0fdf4;
+      border-left: 4px solid var(--success);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      margin: 16px 0;
+      line-height: 1.7;
+    }
+
+    .full-verse .ref {
+      display: block;
+      text-align: right;
+      font-style: normal;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-top: 8px;
+    }
+
+    .completion-message {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      line-height: 1.6;
+      margin: 16px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="../../index.html" class="back-link">&larr; All Lessons</a>
+
+    <div class="activity-header">
+      <span class="lesson-tag">Lesson 80 — Tongue</span>
+      <h1>What Did He Say?</h1>
+      <p class="verse-ref">Proverbs 16:24</p>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen">
+      <p class="intro-text">
+        It is impossible to speak English without vowels! Add the missing vowels
+        to the words in this verse and read what Solomon, the author of Proverbs,
+        had to say about good words.
+      </p>
+
+      <div class="card">
+        <h2>Vowel Key</h2>
+        <div class="legend">
+          <div class="legend-item"><span class="legend-symbol">&#9734;</span> <span class="legend-letter">= A</span></div>
+          <div class="legend-item"><span class="legend-symbol">&#9633;</span> <span class="legend-letter">= E</span></div>
+          <div class="legend-item"><span class="legend-symbol">&#10005;</span> <span class="legend-letter">= I</span></div>
+          <div class="legend-item"><span class="legend-symbol">?</span> <span class="legend-letter">= O</span></div>
+          <div class="legend-item"><span class="legend-symbol">&#9825;</span> <span class="legend-letter">= U</span></div>
+        </div>
+      </div>
+
+      <div class="score-display">
+        <span id="progress-text">0 of 0 vowels found</span>
+      </div>
+      <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
+
+      <div class="card">
+        <div class="verse-area" id="verse-area"></div>
+        <div class="verse-ref-bottom">Proverbs 16:24</div>
+      </div>
+
+      <div id="feedback" class="feedback"></div>
+    </div>
+
+    <!-- Vowel Selector Popup -->
+    <div class="popup-overlay" id="popup-overlay"></div>
+    <div class="vowel-popup" id="vowel-popup">
+      <button class="vowel-popup-btn" data-vowel="A">A</button>
+      <button class="vowel-popup-btn" data-vowel="E">E</button>
+      <button class="vowel-popup-btn" data-vowel="I">I</button>
+      <button class="vowel-popup-btn" data-vowel="O">O</button>
+      <button class="vowel-popup-btn" data-vowel="U">U</button>
+    </div>
+
+    <!-- Completion Screen -->
+    <div class="completion-screen" id="completion-screen">
+      <div class="big-icon">&#x1F41D;</div>
+      <h2>Message Decoded!</h2>
+
+      <div class="full-verse">
+        &ldquo;Pleasant words are as an honeycomb, sweet to the soul, and health to the bones.&rdquo;
+        <span class="ref">&mdash; Proverbs 16:24</span>
+      </div>
+
+      <p class="completion-message">
+        Solomon tells us that kind, pleasant words are like honey &mdash; sweet and healing.
+        What comes out of our mouths reveals what is in our hearts. Let&rsquo;s use our tongues
+        to speak words that bless others!
+      </p>
+
+      <button class="btn btn-primary btn-block" onclick="restart()">Try Again</button>
+    </div>
+  </div>
+
+  <script src="../../js/shared.js"></script>
+  <script>
+    const VERSE = 'Pleasant words are as an honeycomb, sweet to the soul, and health to the bones.';
+    const VOWELS = 'AEIOU';
+    const SYMBOL_MAP = {
+      A: '\u2606', // ☆
+      E: '\u25A1', // □
+      I: '\u2715', // ✕
+      O: '?',      // ?
+      U: '\u2661'  // ♡
+    };
+
+    let vowelSlots = [];
+    let solved = 0;
+    let totalVowels = 0;
+    let activeSlot = null;
+
+    const popup = document.getElementById('vowel-popup');
+    const overlay = document.getElementById('popup-overlay');
+
+    function init() {
+      buildVerse();
+      updateProgressDisplay();
+      bindPopupButtons();
+      bindOverlay();
+    }
+
+    function buildVerse() {
+      const area = document.getElementById('verse-area');
+      area.innerHTML = '';
+      vowelSlots = [];
+      solved = 0;
+      totalVowels = 0;
+
+      for (let i = 0; i < VERSE.length; i++) {
+        const ch = VERSE[i];
+        const upper = ch.toUpperCase();
+
+        if (VOWELS.includes(upper)) {
+          // This character is a vowel — create a tappable symbol
+          const span = document.createElement('span');
+          span.className = 'vowel-slot';
+          span.textContent = SYMBOL_MAP[upper];
+          span.dataset.answer = upper;
+          span.dataset.index = totalVowels;
+          span.addEventListener('click', onSlotTap);
+          area.appendChild(span);
+          vowelSlots.push(span);
+          totalVowels++;
+        } else if (ch === ' ') {
+          const sp = document.createElement('span');
+          sp.className = 'space-char';
+          sp.innerHTML = ' ';
+          area.appendChild(sp);
+        } else {
+          // Consonant or punctuation
+          const span = document.createElement('span');
+          span.className = ch.match(/[a-zA-Z]/) ? 'consonant' : 'punctuation';
+          span.textContent = ch;
+          area.appendChild(span);
+        }
+      }
+    }
+
+    function onSlotTap(e) {
+      const slot = e.currentTarget;
+      if (slot.classList.contains('solved')) return;
+
+      activeSlot = slot;
+      positionPopup(slot);
+      popup.classList.add('visible');
+      overlay.classList.add('visible');
+    }
+
+    function positionPopup(slot) {
+      const rect = slot.getBoundingClientRect();
+      const containerRect = document.querySelector('.container').getBoundingClientRect();
+      const popupWidth = 230; // approximate: 5 buttons * 42px + gaps + padding
+
+      // Position above the tapped symbol
+      let left = rect.left + rect.width / 2 - popupWidth / 2;
+      let top = rect.top - 56;
+
+      // Keep within viewport horizontally
+      const margin = 8;
+      if (left < margin) left = margin;
+      if (left + popupWidth > window.innerWidth - margin) {
+        left = window.innerWidth - margin - popupWidth;
+      }
+
+      // If too close to top, position below instead
+      if (top < margin) {
+        top = rect.bottom + 8;
+      }
+
+      popup.style.left = left + 'px';
+      popup.style.top = top + 'px';
+      popup.style.position = 'fixed';
+    }
+
+    function bindPopupButtons() {
+      const btns = popup.querySelectorAll('.vowel-popup-btn');
+      btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (!activeSlot) return;
+          const chosen = btn.dataset.vowel;
+          const answer = activeSlot.dataset.answer;
+          closePopup();
+
+          if (chosen === answer) {
+            // Correct
+            activeSlot.textContent = VERSE[findOriginalIndex(activeSlot)];
+            activeSlot.classList.add('solved');
+            activeSlot.removeEventListener('click', onSlotTap);
+            solved++;
+            updateProgressDisplay();
+
+            if (solved === totalVowels) {
+              setTimeout(showCompletion, 600);
+            }
+          } else {
+            // Wrong
+            activeSlot.classList.add('wrong');
+            SSA.showFeedback(
+              document.getElementById('feedback'),
+              false,
+              'Not that vowel — try again!'
+            );
+            setTimeout(() => {
+              activeSlot.classList.remove('wrong');
+            }, 450);
+          }
+
+          activeSlot = null;
+        });
+      });
+    }
+
+    function findOriginalIndex(slot) {
+      // Find the position in the original VERSE string for this vowel slot
+      let vowelCount = 0;
+      const targetIndex = parseInt(slot.dataset.index);
+      for (let i = 0; i < VERSE.length; i++) {
+        if (VOWELS.includes(VERSE[i].toUpperCase())) {
+          if (vowelCount === targetIndex) return i;
+          vowelCount++;
+        }
+      }
+      return 0;
+    }
+
+    function bindOverlay() {
+      overlay.addEventListener('click', closePopup);
+    }
+
+    function closePopup() {
+      popup.classList.remove('visible');
+      overlay.classList.remove('visible');
+    }
+
+    function updateProgressDisplay() {
+      document.getElementById('progress-text').textContent =
+        solved + ' of ' + totalVowels + ' vowels found';
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        solved, totalVowels
+      );
+    }
+
+    function showCompletion() {
+      document.getElementById('game-screen').style.display = 'none';
+      document.getElementById('completion-screen').style.display = 'block';
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        totalVowels, totalVowels
+      );
+    }
+
+    function restart() {
+      document.getElementById('completion-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'block';
+      init();
+    }
+
+    init();
+  </script>
+</body>
+</html>

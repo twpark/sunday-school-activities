@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Here's My Heart — Lesson 79: Heart</title>
+  <link rel="stylesheet" href="../../css/shared.css">
+  <style>
+    .intro-text {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* Crossword Grid */
+    .grid-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-bottom: 16px;
+    }
+
+    .crossword-grid {
+      display: grid;
+      grid-template-columns: repeat(13, 28px);
+      grid-template-rows: repeat(10, 28px);
+      gap: 1px;
+      margin: 0 auto;
+      width: fit-content;
+    }
+
+    .cell {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      user-select: none;
+    }
+
+    .cell.empty {
+      background: transparent;
+    }
+
+    .cell.active {
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .cell.active:hover {
+      background: #f1f5f9;
+    }
+
+    .cell.prefilled {
+      background: #dbeafe;
+      border: 1px solid #93c5fd;
+      border-radius: 2px;
+      color: var(--primary-dark);
+      font-weight: 800;
+    }
+
+    .cell.hint-letter {
+      color: #93c5fd;
+      font-weight: 600;
+    }
+
+    .cell.placed {
+      background: #dcfce7;
+      border: 1px solid #86efac;
+      border-radius: 2px;
+      color: var(--success);
+      font-weight: 800;
+    }
+
+    .cell.target-start {
+      box-shadow: 0 0 0 2px var(--primary);
+      z-index: 1;
+    }
+
+    /* Cell number labels */
+    .cell {
+      position: relative;
+    }
+
+    .cell .cell-num {
+      position: absolute;
+      top: 1px;
+      left: 2px;
+      font-size: 0.4rem;
+      font-weight: 600;
+      color: var(--text-light);
+      line-height: 1;
+    }
+
+    /* Word Bank */
+    .word-bank {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .word-chip {
+      padding: 8px 14px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .word-chip:hover {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+
+    .word-chip.selected {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+    }
+
+    .word-chip.done {
+      border-color: var(--success);
+      background: #dcfce7;
+      color: var(--success);
+      cursor: default;
+      opacity: 0.6;
+    }
+
+    .instruction-text {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 8px;
+      min-height: 1.2em;
+    }
+
+    /* Completion Screen */
+    .completion-screen {
+      text-align: center;
+      padding: 30px 20px;
+      display: none;
+    }
+
+    .completion-screen .big-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .completion-screen h2 {
+      margin-bottom: 8px;
+    }
+
+    .full-verse {
+      background: #f0fdf4;
+      border-left: 4px solid var(--success);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      margin: 16px 0;
+      line-height: 1.7;
+    }
+
+    .full-verse .ref {
+      display: block;
+      text-align: right;
+      font-style: normal;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-top: 8px;
+    }
+
+    @media (min-width: 600px) {
+      .crossword-grid {
+        grid-template-columns: repeat(13, 34px);
+        grid-template-rows: repeat(10, 34px);
+      }
+
+      .cell {
+        width: 34px;
+        height: 34px;
+        font-size: 0.85rem;
+      }
+
+      .cell .cell-num {
+        font-size: 0.45rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="../../index.html" class="back-link">&larr; All Lessons</a>
+
+    <div class="activity-header">
+      <span class="lesson-tag">Lesson 79 — Heart</span>
+      <h1>Here's My Heart</h1>
+      <p class="verse-ref">Proverbs 3:5</p>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen">
+      <p class="intro-text">
+        Fill in the crossword with words from Proverbs 3:5.
+        Tap a word from the bank, then tap where it starts on the grid.
+      </p>
+
+      <div class="score-display">
+        <span id="placed-count">0</span> of <span id="word-total">0</span> words placed
+      </div>
+      <div class="progress-bar"><div class="fill" style="width:0%"></div></div>
+
+      <div class="card">
+        <div class="grid-wrapper">
+          <div class="crossword-grid" id="crossword-grid"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Word Bank</h2>
+        <p class="instruction-text" id="instruction">Choose a word below</p>
+        <div class="word-bank" id="word-bank"></div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+    </div>
+
+    <!-- Completion Screen -->
+    <div class="completion-screen" id="completion-screen">
+      <div class="big-icon">&#10084;</div>
+      <h2>Verse Complete!</h2>
+      <p>You filled in the whole crossword!</p>
+
+      <div class="full-verse">
+        &ldquo;Trust in the Lord with all thine heart; and lean not unto thine own understanding.&rdquo;
+        <span class="ref">&mdash; Proverbs 3:5</span>
+      </div>
+
+      <p class="intro-text">
+        God wants all of our heart &mdash; not just part of it. When we trust Him
+        completely and don&rsquo;t lean on our own understanding, He will direct our paths.
+      </p>
+
+      <button class="btn btn-primary btn-block" onclick="restart()">Try Again</button>
+    </div>
+  </div>
+
+  <script src="../../js/shared.js"></script>
+  <script>
+    /* ========================================================
+       Crossword Data
+       ======================================================== */
+
+    // 10 rows x 13 cols — null = empty, letter = active cell
+    const SOLUTION = [
+      [null,null,null,null,null,null,null,null,null,null,null,null,null],
+      [null,null,null,null,null,null,null,null,null,null,null,null,null],
+      [null,null,null,null,'N', 'O', 'T', null,null,null,null,null,null],
+      [null,null,null,null,null,null,'R', null,'L', 'L', null,'T', null],
+      [null,'O', null,null,null,null,'U', null,'E', 'O', null,'H', null],
+      [null,'W', 'T', 'H', 'E', null,'S', null,'A', 'R', 'W', 'I', 'N'],
+      ['U', 'N', 'D', 'E', 'R', 'S', 'T', 'A', 'N', 'D', 'I', 'N', 'G'],
+      ['N', null,null,'A', null,null,null,'L', null,null,'T', 'E', null],
+      ['T', null,null,'R', null,null,null,'L', null,null,'H', null,null],
+      ['O', null,null,'T', null,null,null,null,null,null,null,null,null]
+    ];
+
+    // Word definitions: name, direction, startRow, startCol, letters
+    const WORDS = [
+      // Across
+      { word: 'NOT',           dir: 'across', r: 2, c: 4  },
+      { word: 'THE',           dir: 'across', r: 5, c: 2  },
+      { word: 'UNDERSTANDING', dir: 'across', r: 6, c: 0, prefilled: true },
+      { word: 'IN',            dir: 'across', r: 5, c: 11 },
+      // Down
+      { word: 'OWN',   dir: 'down', r: 4, c: 1  },
+      { word: 'TRUST', dir: 'down', r: 2, c: 6  },
+      { word: 'HEART', dir: 'down', r: 5, c: 3  },
+      { word: 'LEAN',  dir: 'down', r: 3, c: 8  },
+      { word: 'LORD',  dir: 'down', r: 3, c: 9  },
+      { word: 'ALL',   dir: 'down', r: 6, c: 7  },
+      { word: 'THINE', dir: 'down', r: 3, c: 11 },
+      { word: 'WITH',  dir: 'down', r: 5, c: 10 },
+      { word: 'UNTO',  dir: 'down', r: 6, c: 0  }
+    ];
+
+    const PLAYABLE = WORDS.filter(w => !w.prefilled);
+    const TOTAL = PLAYABLE.length;
+
+    /* ========================================================
+       State
+       ======================================================== */
+
+    let selectedWord = null;  // word string currently picked from bank
+    let placedWords = new Set();
+    let cellElements = [];    // 2D array [row][col] of DOM elements
+
+    /* ========================================================
+       Build Grid
+       ======================================================== */
+
+    function buildGrid() {
+      const grid = document.getElementById('crossword-grid');
+      grid.innerHTML = '';
+      cellElements = [];
+
+      // Determine which cells are starting cells for numbering
+      const startCells = {};
+      let num = 0;
+      // Assign numbers in reading order (left-right, top-bottom)
+      for (let r = 0; r < 10; r++) {
+        for (let c = 0; c < 13; c++) {
+          const isStart = WORDS.some(w => w.r === r && w.c === c);
+          if (isStart && SOLUTION[r][c] !== null) {
+            num++;
+            startCells[r + ',' + c] = num;
+          }
+        }
+      }
+
+      for (let r = 0; r < 10; r++) {
+        cellElements[r] = [];
+        for (let c = 0; c < 13; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+
+          if (SOLUTION[r][c] === null) {
+            cell.classList.add('empty');
+          } else {
+            cell.classList.add('active');
+
+            // Number label
+            const key = r + ',' + c;
+            if (startCells[key]) {
+              const numSpan = document.createElement('span');
+              numSpan.className = 'cell-num';
+              numSpan.textContent = startCells[key];
+              cell.appendChild(numSpan);
+            }
+
+            // Pre-filled (UNDERSTANDING)
+            if (r === 6) {
+              cell.classList.remove('active');
+              cell.classList.add('prefilled');
+              cell.textContent = '';
+              // Re-add number if present
+              if (startCells[key]) {
+                cell.innerHTML = '';
+                const numSpan = document.createElement('span');
+                numSpan.className = 'cell-num';
+                numSpan.textContent = startCells[key];
+                cell.appendChild(numSpan);
+              }
+              const letterSpan = document.createTextNode(SOLUTION[r][c]);
+              cell.appendChild(letterSpan);
+            }
+
+            // Click handler for placing words
+            cell.addEventListener('click', () => onCellClick(r, c));
+          }
+
+          grid.appendChild(cell);
+          cellElements[r][c] = cell;
+        }
+      }
+
+      // Show hint letters: crossing letters from UNDERSTANDING in down words
+      showHintLetters();
+    }
+
+    function showHintLetters() {
+      // For each playable word, check if any of its cells lie on row 6
+      // (the UNDERSTANDING row). Those cells already show the letter
+      // as prefilled. For down words that cross row 6, the crossing cell
+      // is prefilled. But we also want to show hints in the DOWN word
+      // cells that are on row 6 — those are already prefilled, so the
+      // hint is inherently visible.
+      //
+      // Additionally, show hint letters in cells where two non-prefilled
+      // words cross, once one of them has been placed.
+      //
+      // On initial load, the only hints are crossing letters from
+      // UNDERSTANDING, which are already shown as prefilled cells.
+      // No additional hint rendering needed for initial state.
+    }
+
+    /* ========================================================
+       Word Bank
+       ======================================================== */
+
+    function buildWordBank() {
+      const bank = document.getElementById('word-bank');
+      bank.innerHTML = '';
+
+      const shuffled = SSA.shuffle(PLAYABLE.map(w => w.word));
+
+      shuffled.forEach(word => {
+        const chip = document.createElement('button');
+        chip.className = 'word-chip';
+        chip.textContent = word;
+        chip.id = 'chip-' + word;
+        chip.addEventListener('click', () => onWordSelect(word, chip));
+        bank.appendChild(chip);
+      });
+    }
+
+    /* ========================================================
+       Interaction
+       ======================================================== */
+
+    function onWordSelect(word, chipEl) {
+      if (placedWords.has(word)) return;
+
+      // Deselect previous
+      document.querySelectorAll('.word-chip.selected').forEach(el => {
+        el.classList.remove('selected');
+      });
+
+      // Clear any highlighted start cells
+      clearTargetHighlights();
+
+      selectedWord = word;
+      chipEl.classList.add('selected');
+      document.getElementById('instruction').textContent =
+        'Now tap where "' + word + '" starts on the grid';
+
+      // Highlight possible start cells for this word
+      highlightStartCells(word);
+    }
+
+    function highlightStartCells(word) {
+      // Find all word definitions matching this word that haven't been placed
+      const matches = PLAYABLE.filter(w => w.word === word && !placedWords.has(word));
+      matches.forEach(w => {
+        const cell = cellElements[w.r][w.c];
+        cell.classList.add('target-start');
+      });
+    }
+
+    function clearTargetHighlights() {
+      document.querySelectorAll('.cell.target-start').forEach(el => {
+        el.classList.remove('target-start');
+      });
+    }
+
+    function onCellClick(r, c) {
+      if (!selectedWord) {
+        document.getElementById('instruction').textContent =
+          'Choose a word from the bank first';
+        return;
+      }
+
+      // Check if this cell is the correct start for the selected word
+      const match = PLAYABLE.find(w =>
+        w.word === selectedWord && w.r === r && w.c === c
+      );
+
+      if (match) {
+        placeWord(match);
+      } else {
+        SSA.showFeedback(
+          document.getElementById('feedback'),
+          false,
+          'Try a different spot!'
+        );
+      }
+    }
+
+    function placeWord(wordDef) {
+      const { word, dir, r, c } = wordDef;
+
+      // Fill in cells
+      for (let i = 0; i < word.length; i++) {
+        const cr = dir === 'down' ? r + i : r;
+        const cc = dir === 'across' ? c + i : c;
+        const cell = cellElements[cr][cc];
+
+        // Don't overwrite prefilled cells
+        if (!cell.classList.contains('prefilled')) {
+          cell.classList.remove('active');
+          cell.classList.remove('hint-letter');
+          cell.classList.add('placed');
+
+          // Preserve the number span if present
+          const numSpan = cell.querySelector('.cell-num');
+          cell.textContent = word[i];
+          if (numSpan) {
+            cell.textContent = '';
+            cell.appendChild(numSpan);
+            cell.appendChild(document.createTextNode(word[i]));
+          }
+        }
+      }
+
+      // Update crossing cells — if placing this word reveals a letter
+      // shared with another unplaced word, show it as a hint
+      updateCrossingHints(wordDef);
+
+      // Mark word as placed
+      placedWords.add(word);
+
+      // Update bank chip
+      const chip = document.getElementById('chip-' + word);
+      if (chip) {
+        chip.classList.remove('selected');
+        chip.classList.add('done');
+      }
+
+      // Reset selection
+      selectedWord = null;
+      clearTargetHighlights();
+
+      // Update progress
+      const count = placedWords.size;
+      document.getElementById('placed-count').textContent = count;
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        count, TOTAL
+      );
+
+      document.getElementById('instruction').textContent = 'Choose a word below';
+
+      SSA.showFeedback(
+        document.getElementById('feedback'),
+        true,
+        '"' + word + '" placed!'
+      );
+
+      // Check completion
+      if (count === TOTAL) {
+        setTimeout(() => showCompletion(), 2500);
+      }
+    }
+
+    function updateCrossingHints(placedWordDef) {
+      const { word, dir, r, c } = placedWordDef;
+
+      // For each cell in the placed word, check if any unplaced word
+      // crosses through that cell. If so, show the letter as a hint.
+      for (let i = 0; i < word.length; i++) {
+        const cr = dir === 'down' ? r + i : r;
+        const cc = dir === 'across' ? c + i : c;
+
+        // Find other words that pass through this cell
+        PLAYABLE.forEach(other => {
+          if (other.word === word) return;
+          if (placedWords.has(other.word)) return;
+
+          for (let j = 0; j < other.word.length; j++) {
+            const or = other.dir === 'down' ? other.r + j : other.r;
+            const oc = other.dir === 'across' ? other.c + j : other.c;
+
+            if (or === cr && oc === cc) {
+              const cell = cellElements[or][oc];
+              // Only add hint if cell isn't already placed or prefilled
+              if (!cell.classList.contains('placed') &&
+                  !cell.classList.contains('prefilled')) {
+                cell.classList.add('hint-letter');
+                const numSpan = cell.querySelector('.cell-num');
+                cell.textContent = SOLUTION[or][oc];
+                if (numSpan) {
+                  cell.textContent = '';
+                  cell.appendChild(numSpan);
+                  cell.appendChild(document.createTextNode(SOLUTION[or][oc]));
+                }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    /* ========================================================
+       Completion
+       ======================================================== */
+
+    function showCompletion() {
+      document.getElementById('game-screen').style.display = 'none';
+      document.getElementById('completion-screen').style.display = 'block';
+    }
+
+    function restart() {
+      document.getElementById('completion-screen').style.display = 'none';
+      document.getElementById('game-screen').style.display = 'block';
+
+      selectedWord = null;
+      placedWords = new Set();
+      document.getElementById('placed-count').textContent = '0';
+      document.getElementById('instruction').textContent = 'Choose a word below';
+
+      SSA.updateProgress(
+        document.querySelector('.progress-bar'),
+        0, TOTAL
+      );
+
+      buildGrid();
+      buildWordBank();
+    }
+
+    /* ========================================================
+       Init
+       ======================================================== */
+
+    function init() {
+      document.getElementById('word-total').textContent = TOTAL;
+      buildGrid();
+      buildWordBank();
+    }
+
+    init();
+  </script>
+</body>
+</html>
