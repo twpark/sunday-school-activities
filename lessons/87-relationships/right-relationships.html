@@ -187,6 +187,13 @@
 
     .action-row .btn { font-size: 0.9rem; padding: 8px 16px; }
 
+    .hint-btn {
+      display: block;
+      margin: 10px auto 0;
+      font-size: 0.8rem;
+      padding: 6px 14px;
+    }
+
     /* Completion screen */
     .completion-screen {
       text-align: center;
@@ -252,6 +259,8 @@
         <div class="action-row">
           <button class="btn btn-outline" onclick="clearCurrentWord()">Clear</button>
         </div>
+
+        <button class="btn btn-outline hint-btn" id="hint-btn" onclick="showHint()" style="display:none;">Need help? Reveal first letter</button>
 
         <div class="feedback" id="feedback"></div>
       </div>
@@ -417,12 +426,15 @@
         word: word,
         letters: scrambleWord(word),
         guessed: [],
-        solved: false
+        solved: false,
+        wrongAttempts: 0,
+        hintedCount: 0
       }));
 
       renderVerseProgress();
       renderPuzzle();
       document.getElementById('feedback').style.display = 'none';
+      document.getElementById('hint-btn').style.display = 'none';
     }
 
     /* ---- Render the Puzzle ---- */
@@ -457,10 +469,15 @@
             slot.classList.add('correct');
             slot.textContent = ws.word[i];
           } else if (i < ws.guessed.length) {
-            slot.classList.add('filled');
+            const hinted = ws.hintedCount || 0;
+            if (i < hinted) {
+              slot.classList.add('correct');
+            } else {
+              slot.classList.add('filled');
+            }
             slot.textContent = ws.guessed[i];
-            // Allow clicking filled slots to remove from end
-            if (wIdx === activeWordIdx) {
+            // Allow clicking filled (non-hinted) slots to remove from end
+            if (wIdx === activeWordIdx && i >= hinted) {
               slot.style.cursor = 'pointer';
               slot.onclick = () => undoGuessTo(wIdx, i);
             }
@@ -539,6 +556,8 @@
     function undoGuessTo(wordIdx, fromPos) {
       const ws = wordStates[wordIdx];
       if (ws.solved) return;
+      const hinted = ws.hintedCount || 0;
+      if (fromPos < hinted) return;
 
       // Remove from fromPos onward
       const removeCount = ws.guessed.length - fromPos;
@@ -558,8 +577,9 @@
       const ws = wordStates[activeWordIdx];
       if (ws.solved) return;
 
-      ws.guessed = [];
-      ws.usedIndices = [];
+      const hinted = ws.hintedCount || 0;
+      ws.guessed = ws.guessed.slice(0, hinted);
+      ws.usedIndices = (ws.usedIndices || []).slice(0, hinted);
 
       renderPuzzle();
       document.getElementById('feedback').style.display = 'none';
@@ -608,21 +628,57 @@
           }, 2500);
         }
       } else {
-        SSA.showFeedback(
-          document.getElementById('feedback'),
-          false,
-          'Not quite right. Tap Clear and try again!'
-        );
+        ws.wrongAttempts = (ws.wrongAttempts || 0) + 1;
+        if (ws.wrongAttempts >= 2) {
+          document.getElementById('hint-btn').style.display = 'block';
+          SSA.showFeedback(
+            document.getElementById('feedback'),
+            false,
+            'Not quite — try the hint if you\'re stuck!'
+          );
+        } else {
+          SSA.showFeedback(
+            document.getElementById('feedback'),
+            false,
+            'Not quite right. Tap Clear and try again!'
+          );
+        }
 
-        // Reset this word after feedback
+        // Reset this word after feedback (preserve hinted letters)
         setTimeout(() => {
           if (!ws.solved) {
-            ws.guessed = [];
-            ws.usedIndices = [];
+            const hinted = ws.hintedCount || 0;
+            ws.guessed = ws.guessed.slice(0, hinted);
+            ws.usedIndices = (ws.usedIndices || []).slice(0, hinted);
             renderPuzzle();
           }
         }, 2500);
       }
+    }
+
+    /* ---- Hint ---- */
+
+    function showHint() {
+      const ws = wordStates[activeWordIdx];
+      if (ws.solved || ws.hintedCount > 0) return;
+
+      // Clear current guess
+      ws.guessed = [];
+      ws.usedIndices = [];
+
+      // Find tile for first letter
+      const firstLetter = ws.word[0];
+      for (let i = 0; i < ws.letters.length; i++) {
+        if (ws.letters[i] === firstLetter) {
+          ws.guessed = [firstLetter];
+          ws.usedIndices = [i];
+          ws.hintedCount = 1;
+          break;
+        }
+      }
+
+      renderPuzzle();
+      document.getElementById('hint-btn').style.display = 'none';
     }
 
     /* ---- Completion ---- */

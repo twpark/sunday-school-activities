@@ -103,6 +103,16 @@
       80% { transform: translateX(2px); color: var(--error); }
     }
 
+    .legend-item.hint-pulse {
+      animation: legendPulse 0.5s ease-in-out 3;
+      border-radius: 6px;
+    }
+
+    @keyframes legendPulse {
+      0%, 100% { background: transparent; }
+      50% { background: #fef3c7; }
+    }
+
     .verse-ref-bottom {
       text-align: center;
       font-style: italic;
@@ -403,13 +413,30 @@
               setTimeout(showCompletion, 600);
             }
           } else {
-            // Wrong
+            // Wrong — track attempts
+            var wrongCount = parseInt(activeSlot.dataset.wrong || '0') + 1;
+            activeSlot.dataset.wrong = String(wrongCount);
             activeSlot.classList.add('wrong');
-            SSA.showFeedback(
-              document.getElementById('feedback'),
-              false,
-              'Not that vowel — try again!'
-            );
+
+            if (wrongCount >= 2) {
+              var vowelIdx = 'AEIOU'.indexOf(answer);
+              var items = document.querySelectorAll('.legend-item');
+              if (items[vowelIdx]) {
+                items[vowelIdx].classList.add('hint-pulse');
+                setTimeout(function() { items[vowelIdx].classList.remove('hint-pulse'); }, 2000);
+              }
+              SSA.showFeedback(
+                document.getElementById('feedback'),
+                false,
+                'Check the Vowel Key — find this symbol!'
+              );
+            } else {
+              SSA.showFeedback(
+                document.getElementById('feedback'),
+                false,
+                'Not that vowel — try again!'
+              );
+            }
             setTimeout(() => {
               activeSlot.classList.remove('wrong');
             }, 450);

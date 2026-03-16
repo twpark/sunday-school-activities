@@ -264,6 +264,7 @@
     let currentSentenceIndex = 0;
     let placedWords = [];
     let scrambledOrder = [];
+    let wrongAttempts = 0;
 
     function init() {
       document.getElementById('sent-total').textContent = SENTENCES.length;
@@ -273,6 +274,7 @@
     function loadSentence(index) {
       currentSentenceIndex = index;
       placedWords = [];
+      wrongAttempts = 0;
 
       const sentence = SENTENCES[index];
       const words = sentence.text.split(' ');
@@ -382,12 +384,35 @@
           }
         }, 2500);
       } else {
-        SSA.showFeedback(
-          document.getElementById('feedback'),
-          false,
-          'Not quite the right order. Try rearranging the words!'
-        );
+        wrongAttempts++;
+        if (wrongAttempts >= 2) {
+          showPositionHints(correctWords);
+          SSA.showFeedback(
+            document.getElementById('feedback'),
+            false,
+            'Green = right spot! Rearrange the orange words.'
+          );
+        } else {
+          SSA.showFeedback(
+            document.getElementById('feedback'),
+            false,
+            'Not quite the right order. Try rearranging the words!'
+          );
+        }
       }
+    }
+
+    function showPositionHints(correctWords) {
+      var placed = document.querySelectorAll('#built-sentence .placed-word');
+      placed.forEach(function(el, i) {
+        if (el.textContent === correctWords[i]) {
+          el.style.borderColor = '#16a34a';
+          el.style.background = '#dcfce7';
+        } else {
+          el.style.borderColor = '#ea580c';
+          el.style.background = '#fff7ed';
+        }
+      });
     }
 
     function showCompletion() {
