@@ -181,6 +181,12 @@
     .letter-btn:hover { background: #e2e8f0; }
     .letter-btn:active { background: #dbeafe; }
 
+    #keyboard-card {
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+    }
+
     /* Crossword grid */
     .crossword-section {
       margin-bottom: 16px;
@@ -207,8 +213,10 @@
     }
 
     .crossword-cell {
-      width: 26px;
-      height: 26px;
+      flex: 1;
+      min-width: 0;
+      max-width: 26px;
+      aspect-ratio: 1;
       border: 1px solid var(--border);
       border-radius: 3px;
       display: flex;
@@ -306,8 +314,7 @@
 
     @media (min-width: 600px) {
       .crossword-cell {
-        width: 30px;
-        height: 30px;
+        max-width: 30px;
         font-size: 0.85rem;
       }
 

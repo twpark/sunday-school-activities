@@ -23,17 +23,15 @@
 
     .ws-grid {
       display: grid;
-      grid-template-columns: repeat(12, 30px);
-      grid-template-rows: repeat(12, 30px);
+      grid-template-columns: repeat(12, minmax(0, 30px));
       gap: 2px;
       margin: 0 auto;
-      width: fit-content;
+      justify-content: center;
       user-select: none;
     }
 
     .ws-cell {
-      width: 30px;
-      height: 30px;
+      aspect-ratio: 1;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -147,12 +145,9 @@
     @media (min-width: 600px) {
       .ws-grid {
         grid-template-columns: repeat(12, 36px);
-        grid-template-rows: repeat(12, 36px);
       }
 
       .ws-cell {
-        width: 36px;
-        height: 36px;
         font-size: 0.95rem;
       }
     }

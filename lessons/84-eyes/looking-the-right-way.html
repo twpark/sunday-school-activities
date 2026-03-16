@@ -6,27 +6,31 @@
   <title>Looking the Right Way — Lesson 84: Eyes</title>
   <link rel="stylesheet" href="../../css/shared.css">
   <style>
-    .eye-chart {
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 20px repeat(9, 28px);
+      grid-template-rows: 20px repeat(10, 28px);
+      gap: 2px;
+      justify-content: center;
       background: white;
       border: 3px solid #1e293b;
       border-radius: var(--radius);
-      padding: 16px 8px;
-      text-align: center;
-      margin-bottom: 16px;
+      padding: 8px;
       font-family: 'Courier New', monospace;
       user-select: none;
+      margin-bottom: 16px;
     }
 
-    .chart-row {
+    .chart-label {
       display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 0;
-      margin-bottom: 2px;
+      font-size: 0.65rem;
+      color: var(--text-light);
+      font-weight: 600;
     }
 
     .chart-cell {
-      width: 32px;
-      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -34,7 +38,6 @@
       cursor: pointer;
       border-radius: 4px;
       transition: background 0.15s;
-      font-size: 0.95rem;
     }
 
     .chart-cell:hover { background: #e2e8f0; }
@@ -49,37 +52,26 @@
       color: white;
     }
 
-    .row-labels {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      margin-right: 4px;
+    .chart-cell.hint-pulse {
+      animation: hintPulse 0.5s ease-in-out 4;
     }
 
-    .chart-wrapper {
-      display: flex;
-      justify-content: center;
+    @keyframes hintPulse {
+      0%, 100% { background: #fbbf24; color: #1e293b; }
+      50% { background: #fef3c7; }
     }
 
-    .row-label, .col-label {
-      width: 24px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      color: var(--text-light);
-      font-weight: 600;
-    }
-
-    .col-labels {
-      display: flex;
-      justify-content: center;
-      gap: 0;
-      margin-left: 28px;
-    }
-
-    .col-label { width: 32px; }
+    /* Eye chart size tiers — larger at top, smaller at bottom */
+    .chart-cell[data-r="1"] { font-size: 1.5rem; }
+    .chart-cell[data-r="2"] { font-size: 1.25rem; }
+    .chart-cell[data-r="3"] { font-size: 1.1rem; }
+    .chart-cell[data-r="4"] { font-size: 0.95rem; }
+    .chart-cell[data-r="5"] { font-size: 0.85rem; }
+    .chart-cell[data-r="6"] { font-size: 0.78rem; }
+    .chart-cell[data-r="7"] { font-size: 0.72rem; }
+    .chart-cell[data-r="8"] { font-size: 0.68rem; }
+    .chart-cell[data-r="9"] { font-size: 0.64rem; }
+    .chart-cell[data-r="10"] { font-size: 0.6rem; }
 
     .coordinate-clue {
       text-align: center;
@@ -106,6 +98,13 @@
       margin-top: 4px;
     }
 
+    .hint-btn {
+      display: none;
+      margin: 8px auto 0;
+      font-size: 0.8rem;
+      padding: 6px 14px;
+    }
+
     .answer-display {
       text-align: center;
       min-height: 50px;
@@ -116,17 +115,17 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 4px;
+      gap: 3px;
     }
 
     .answer-letter {
-      width: 30px;
-      height: 36px;
+      width: 26px;
+      height: 32px;
       border-bottom: 2px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 700;
     }
 
@@ -136,7 +135,7 @@
     }
 
     .answer-letter.space {
-      width: 16px;
+      width: 12px;
       border: none;
     }
 
@@ -174,18 +173,6 @@
       margin-bottom: 16px;
       line-height: 1.5;
     }
-
-    /* Size tiers like a real eye chart */
-    .chart-row:nth-child(1) .chart-cell { font-size: 1.6rem; }
-    .chart-row:nth-child(2) .chart-cell { font-size: 1.3rem; }
-    .chart-row:nth-child(3) .chart-cell { font-size: 1.1rem; }
-    .chart-row:nth-child(4) .chart-cell { font-size: 0.95rem; }
-    .chart-row:nth-child(5) .chart-cell { font-size: 0.85rem; }
-    .chart-row:nth-child(6) .chart-cell { font-size: 0.78rem; }
-    .chart-row:nth-child(7) .chart-cell { font-size: 0.72rem; }
-    .chart-row:nth-child(8) .chart-cell { font-size: 0.68rem; }
-    .chart-row:nth-child(9) .chart-cell { font-size: 0.65rem; }
-    .chart-row:nth-child(10) .chart-cell { font-size: 0.62rem; }
   </style>
 </head>
 <body>
@@ -195,21 +182,18 @@
     <div class="activity-header">
       <span class="lesson-tag">Lesson 84 — Eyes</span>
       <h1>Looking the Right Way</h1>
-      <p class="verse-ref">Psalm 119:37</p>
+      <p class="verse-ref">Psalm 121:1</p>
     </div>
 
     <div id="game-screen">
       <p class="intro-text">
-        Use the eye chart below to find the right letters. Each coordinate tells you the row and column.
-        For example, <strong>3-2</strong> means row 3, column 2.
+        Find each letter on the eye chart using its coordinates.
+        The first number is the <strong>row</strong> (left side)
+        and the second is the <strong>column</strong> (top).
       </p>
 
       <div class="card">
-        <div class="col-labels" id="col-labels"></div>
-        <div class="chart-wrapper">
-          <div class="row-labels" id="row-labels"></div>
-          <div class="eye-chart" id="eye-chart"></div>
-        </div>
+        <div class="chart-grid" id="chart-grid"></div>
       </div>
 
       <div class="score-display">
@@ -221,8 +205,12 @@
         <div class="coordinate-clue">
           <div class="clue-label">Find the letter at:</div>
           <div class="coords" id="current-coords"></div>
-          <div class="hint">Row - Column</div>
+          <div class="hint">Row — Column</div>
         </div>
+
+        <button class="btn btn-outline hint-btn" id="hint-btn" onclick="showHint()">
+          Need help? Show me!
+        </button>
 
         <div class="answer-display">
           <div class="answer-letters" id="answer-letters"></div>
@@ -254,63 +242,56 @@
 
   <script src="../../js/shared.js"></script>
   <script>
-    // Psalm 121:1 KJV — the verse from the PDF worksheet
-    const VERSE = 'I will lift up mine eyes unto the hills from whence cometh my help';
+    // Psalm 121:1 KJV
+    const VERSE = 'I will lift up mine eyes unto the hills, from whence cometh my help';
     const VERSE_REF = 'Psalm 121:1';
 
-    // Eye chart grid — letters arranged like a Snellen chart
-    // Row sizes decrease (fewer letters per row at top, more at bottom)
-    // Chart designed to contain all letters needed for the verse
-    // Extra row added to ensure enough I, H, M, T, O for repeated letters
+    // Eye chart grid — Snellen-style, each row has more letters
+    // All letters needed for the verse are present with correct counts:
+    // E:8 I:5 H:5 T:4 L:6 M:4 N:3 O:3 W:2 F:2 U:2 P:2 Y:2 S:2 C:2 R:1
     const CHART = [
       ['E'],
       ['I', 'H'],
-      ['E', 'T', 'L'],
-      ['O', 'N', 'E', 'C'],
-      ['H', 'Y', 'L', 'I', 'F'],
-      ['E', 'I', 'H', 'M', 'S', 'U'],
-      ['T', 'M', 'W', 'O', 'L', 'N', 'P'],
-      ['E', 'H', 'U', 'H', 'I', 'F', 'W', 'E'],
-      ['N', 'C', 'L', 'Y', 'L', 'E', 'M', 'S', 'R'],
-      ['I', 'T', 'H', 'O', 'M', 'A', 'D', 'G', 'B']
+      ['T', 'E', 'L'],
+      ['N', 'O', 'C', 'E'],
+      ['H', 'I', 'L', 'Y', 'F'],
+      ['E', 'M', 'I', 'S', 'U', 'T'],
+      ['L', 'T', 'N', 'W', 'O', 'M', 'P'],
+      ['W', 'E', 'H', 'I', 'L', 'F', 'U', 'H'],
+      ['P', 'N', 'E', 'S', 'T', 'Y', 'M', 'C', 'R'],
+      ['E', 'I', 'H', 'M', 'O', 'L', 'E', 'L', 'B']
     ];
 
-    // Coordinates for each letter in the verse (row, col) — 1-indexed
-    // I WILL LIFT UP MINE EYES UNTO THE HILLS FROM WHENCE COMETH MY HELP
-    const COORDS = [
-      // I
-      {r:2,c:1},
-      // WILL
-      {r:7,c:3}, {r:4,c:1/*O? no*/}, // Let me rebuild this properly
-    ];
-
-    // Better approach: pre-compute coordinates for each character in the verse
-    // by placing answer letters into the chart
     const VERSE_UPPER = VERSE.toUpperCase();
-    const LETTER_LIST = VERSE_UPPER.split('').filter(c => c !== ' ');
+    const LETTER_LIST = VERSE_UPPER.split('').filter(c => c !== ' ' && c !== ',');
+    const MAX_COLS = Math.max(...CHART.map(r => r.length));
 
-    // Build coordinate map: for each letter we need, find it in the chart
+    // Compute the grid column (1-indexed) for a letter at array position c in row r
+    function getGridCol(r, c) {
+      const startCol = Math.floor((MAX_COLS - CHART[r].length) / 2);
+      return startCol + c + 1;
+    }
+
+    // Map each verse letter to a unique chart position using grid coordinates
     function buildCoordinates() {
       const coords = [];
-      const used = {}; // track used positions to avoid reuse
+      const used = {};
 
       for (const targetLetter of LETTER_LIST) {
         let found = false;
-        // Search chart for this letter
         for (let r = 0; r < CHART.length && !found; r++) {
           for (let c = 0; c < CHART[r].length && !found; c++) {
             const key = r + '-' + c;
             if (CHART[r][c] === targetLetter && !used[key]) {
-              coords.push({ r: r + 1, c: c + 1 }); // 1-indexed
+              coords.push({ r: r + 1, c: getGridCol(r, c) });
               used[key] = true;
               found = true;
             }
           }
         }
         if (!found) {
-          // Letter not in chart — add it to a random position
-          // This shouldn't happen if chart is designed properly
-          coords.push({ r: 1, c: 1 });
+          console.error('Letter not found in chart:', targetLetter);
+          coords.push({ r: 1, c: 5 });
         }
       }
       return coords;
@@ -318,6 +299,7 @@
 
     let coordinates;
     let currentLetterIndex = 0;
+    let wrongCount = 0;
 
     function init() {
       coordinates = buildCoordinates();
@@ -328,56 +310,42 @@
     }
 
     function renderChart() {
-      const chart = document.getElementById('eye-chart');
-      const colLabels = document.getElementById('col-labels');
-      const rowLabels = document.getElementById('row-labels');
+      const grid = document.getElementById('chart-grid');
+      grid.innerHTML = '';
 
-      chart.innerHTML = '';
-      rowLabels.innerHTML = '';
-
-      // Find max columns
-      const maxCols = Math.max(...CHART.map(r => r.length));
-
-      // Column labels
-      colLabels.innerHTML = '<div style="width:28px"></div>'; // offset for row labels
-      for (let c = 0; c < maxCols; c++) {
+      // Column labels (grid row 1, grid columns 2 through MAX_COLS+1)
+      for (let c = 0; c < MAX_COLS; c++) {
         const label = document.createElement('div');
-        label.className = 'col-label';
+        label.className = 'chart-label';
         label.textContent = c + 1;
-        colLabels.appendChild(label);
+        label.style.gridRow = '1';
+        label.style.gridColumn = String(c + 2);
+        grid.appendChild(label);
       }
 
       CHART.forEach((row, r) => {
-        // Row label
+        // Row label (grid column 1)
         const rowLabel = document.createElement('div');
-        rowLabel.className = 'row-label';
+        rowLabel.className = 'chart-label';
         rowLabel.textContent = r + 1;
-        rowLabel.style.height = '32px';
-        rowLabels.appendChild(rowLabel);
+        rowLabel.style.gridRow = String(r + 2);
+        rowLabel.style.gridColumn = '1';
+        grid.appendChild(rowLabel);
 
-        const rowEl = document.createElement('div');
-        rowEl.className = 'chart-row';
-
-        // Center the row — pad with empty cells
-        const padLeft = Math.floor((maxCols - row.length) / 2);
-        for (let i = 0; i < padLeft; i++) {
-          const empty = document.createElement('div');
-          empty.className = 'chart-cell';
-          empty.style.visibility = 'hidden';
-          rowEl.appendChild(empty);
-        }
-
+        // Letter cells
+        const startCol = Math.floor((MAX_COLS - row.length) / 2);
         row.forEach((letter, c) => {
+          const gridCol = startCol + c + 1; // 1-indexed visual column
           const cell = document.createElement('div');
           cell.className = 'chart-cell';
           cell.textContent = letter;
-          cell.dataset.row = r + 1;
-          cell.dataset.col = c + 1;
-          cell.onclick = () => cellClicked(r + 1, c + 1, letter, cell);
-          rowEl.appendChild(cell);
+          cell.dataset.r = String(r + 1);
+          cell.dataset.gc = String(gridCol);
+          cell.style.gridRow = String(r + 2);
+          cell.style.gridColumn = String(gridCol + 1); // +1 for row-label column
+          cell.onclick = () => cellClicked(r + 1, gridCol, letter, cell);
+          grid.appendChild(cell);
         });
-
-        chart.appendChild(rowEl);
       });
     }
 
@@ -385,7 +353,7 @@
       const container = document.getElementById('answer-letters');
       container.innerHTML = '';
 
-      const words = VERSE_UPPER.split(' ');
+      const words = VERSE_UPPER.replace(',', '').split(' ');
       let letterIdx = 0;
 
       words.forEach((word, wi) => {
@@ -412,7 +380,7 @@
       }
       const coord = coordinates[currentLetterIndex];
       document.getElementById('current-coords').textContent =
-        coord.r + ' - ' + coord.c;
+        coord.r + ' — ' + coord.c;
       document.getElementById('letter-num').textContent = currentLetterIndex + 1;
 
       SSA.updateProgress(
@@ -425,7 +393,6 @@
       const target = coordinates[currentLetterIndex];
 
       if (row === target.r && col === target.c) {
-        // Correct!
         cellEl.classList.add('correct-cell');
 
         const answerEl = document.getElementById('al-' + currentLetterIndex);
@@ -439,16 +406,35 @@
           1500
         );
 
+        wrongCount = 0;
+        document.getElementById('hint-btn').style.display = 'none';
         currentLetterIndex++;
         setTimeout(() => showCurrentCoord(), 1500);
       } else {
+        wrongCount++;
+        if (wrongCount >= 2) {
+          document.getElementById('hint-btn').style.display = 'block';
+        }
         SSA.showFeedback(
           document.getElementById('feedback'),
           false,
-          'That\'s row ' + row + ', column ' + col + '. Look for ' + target.r + '-' + target.c + '!',
+          'That\'s row ' + row + ', column ' + col + '. Look for row ' + target.r + ', column ' + target.c + '!',
           2500
         );
       }
+    }
+
+    function showHint() {
+      const target = coordinates[currentLetterIndex];
+      const cell = document.querySelector(
+        '.chart-cell[data-r="' + target.r + '"][data-gc="' + target.c + '"]'
+      );
+      if (cell) {
+        cell.classList.add('hint-pulse');
+        setTimeout(() => cell.classList.remove('hint-pulse'), 2000);
+      }
+      document.getElementById('hint-btn').style.display = 'none';
+      wrongCount = 0;
     }
 
     function showCompletion() {
@@ -464,10 +450,11 @@
       document.getElementById('completion-screen').style.display = 'none';
       document.getElementById('game-screen').style.display = 'block';
       currentLetterIndex = 0;
+      wrongCount = 0;
+      document.getElementById('hint-btn').style.display = 'none';
 
-      // Clear chart highlights
       document.querySelectorAll('.chart-cell').forEach(c => {
-        c.classList.remove('selected', 'correct-cell');
+        c.classList.remove('selected', 'correct-cell', 'hint-pulse');
       });
 
       renderAnswerDisplay();

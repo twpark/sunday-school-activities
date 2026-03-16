@@ -23,16 +23,14 @@
 
     .crossword-grid {
       display: grid;
-      grid-template-columns: repeat(13, 28px);
-      grid-template-rows: repeat(10, 28px);
+      grid-template-columns: repeat(13, minmax(0, 28px));
       gap: 1px;
       margin: 0 auto;
-      width: fit-content;
+      justify-content: center;
     }
 
     .cell {
-      width: 28px;
-      height: 28px;
+      aspect-ratio: 1;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -186,12 +184,9 @@
     @media (min-width: 600px) {
       .crossword-grid {
         grid-template-columns: repeat(13, 34px);
-        grid-template-rows: repeat(10, 34px);
       }
 
       .cell {
-        width: 34px;
-        height: 34px;
         font-size: 0.85rem;
       }
 

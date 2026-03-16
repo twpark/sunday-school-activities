@@ -169,6 +169,15 @@
     .letter-btn:hover { background: #e2e8f0; }
     .letter-btn:active { background: #dbeafe; }
 
+    .keyboard-sticky {
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+      background: var(--bg);
+      padding: 8px 0 16px;
+      border-top: 1px solid var(--border);
+    }
+
     .action-row {
       display: flex;
       gap: 8px;
@@ -255,14 +264,15 @@
           <div class="letter-slots" id="letter-slots"></div>
         </div>
 
-        <div class="letter-buttons" id="letter-buttons"></div>
+        <div class="feedback" id="feedback"></div>
+      </div>
 
+      <div class="keyboard-sticky">
+        <div class="letter-buttons" id="letter-buttons"></div>
         <div class="action-row">
           <button class="btn btn-outline" onclick="clearCurrent()">Clear</button>
           <button class="btn btn-primary" onclick="submitWord()">Check</button>
         </div>
-
-        <div class="feedback" id="feedback"></div>
       </div>
     </div>
 
